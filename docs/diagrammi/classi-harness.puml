@@ -1,0 +1,52 @@
+@startuml classi-harness
+skinparam classAttributeIconSize 0
+hide empty members
+title Harness agentico
+
+class Client <<SDK>>
+
+class Cli {
+  + avvia() : Promise<void>
+  + conferma(chiamata : ChiamataTool) : Promise<boolean>
+}
+
+class Agent {
+  - maxIterazioni : number
+  - promptDiSistema : string
+  + esegui(richiesta : string) : Promise<EsitoAgente>
+  - eseguiChiamata(chiamata : ChiamataTool) : Promise<string>
+}
+
+interface ModelProvider {
+  + chat(messaggi, tools) : Promise<RispostaModello>
+}
+
+class OllamaProvider {
+  - modello : string
+}
+
+interface ConfermaUtente {
+  + conferma(chiamata : ChiamataTool) : Promise<boolean>
+}
+
+class McpToolClient {
+  - client : Client
+  + connetti() : Promise<void>
+  + elencaTool() : Promise<SpecTool[]>
+  + chiamaTool(nome, args) : Promise<string>
+}
+
+class JsonlLogger {
+  - percorsoFile : string
+  + registra(evento : EventoLog) : void
+}
+
+Cli --> Agent
+Cli ..|> ConfermaUtente
+Agent --> ModelProvider
+Agent --> McpToolClient
+Agent --> ConfermaUtente
+Agent --> JsonlLogger
+OllamaProvider ..|> ModelProvider
+McpToolClient --> Client
+@enduml

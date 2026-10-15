@@ -1,0 +1,54 @@
+@startuml classi-server
+skinparam classAttributeIconSize 0
+hide empty members
+title Server MCP
+
+class McpServer <<SDK>>
+
+class RecallMcpServer {
+  - server : McpServer
+  - tools : RecallTool[]
+  + avvia() : Promise<void>
+}
+
+abstract class RecallTool {
+  + nome : string
+  + descrizione : string
+  + schemaInput : ZodSchema
+  + soloLettura : boolean
+  # repo : RecallRepository
+  + {abstract} esegui(args) : Promise<RisultatoTool>
+}
+
+class AppuntamentiDaConfermare
+class RegistraEsitoContatto
+class SlotLiberi
+class ProponiCandidati
+class RiassegnaSlot
+class VerificaTempiAttesa
+
+class RecallRepository {
+  - pool : Pool
+  + appuntamentiDaConfermare(giorni, sedeId?)
+  + registraEsito(prenotazioneId, esito)
+  + slotLiberi(prestazioneId?, sedeId?, dal, al)
+  + candidatiPerSlot(slotId, limite)
+  + riassegnaSlot(slotId, richiestaId)
+  + tempiAttesa(prestazioneId?, classe?, dal, al)
+}
+
+class SoglieAttesa <<config>> {
+  + giorni(classe, tipoPrestazione) : number
+}
+
+RecallMcpServer --> McpServer
+RecallMcpServer o-- "6" RecallTool
+RecallTool <|-- AppuntamentiDaConfermare
+RecallTool <|-- RegistraEsitoContatto
+RecallTool <|-- SlotLiberi
+RecallTool <|-- ProponiCandidati
+RecallTool <|-- RiassegnaSlot
+RecallTool <|-- VerificaTempiAttesa
+RecallTool --> RecallRepository
+VerificaTempiAttesa ..> SoglieAttesa
+@enduml
