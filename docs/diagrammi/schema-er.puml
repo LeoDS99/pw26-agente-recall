@@ -1,0 +1,78 @@
+@startuml schema-er
+hide circle
+skinparam linetype ortho
+
+entity "sedi" as sedi {
+  * id : serial <<PK>>
+  --
+  * nome : text
+  * localita : text
+}
+
+entity "prestazioni" as prestazioni {
+  * id : serial <<PK>>
+  --
+  * nome : text
+  * tipo : text <<visita | esame>>
+  * durata_minuti : int
+}
+
+entity "pazienti" as pazienti {
+  * id : serial <<PK>>
+  --
+  * nome : text
+  * cognome : text
+  * telefono : text
+  * sede_riferimento_id : int <<FK>>
+}
+
+entity "slot" as slot {
+  * id : serial <<PK>>
+  --
+  * sede_id : int <<FK>>
+  * prestazione_id : int <<FK>>
+  * inizio : timestamp
+}
+
+entity "richieste" as richieste {
+  * id : serial <<PK>>
+  --
+  * paziente_id : int <<FK>>
+  * prestazione_id : int <<FK>>
+  * classe_priorita : char <<U | B | D | P>>
+  * data_richiesta : date
+  * stato : text <<in_attesa | prenotata | annullata>>
+}
+
+entity "prenotazioni" as prenotazioni {
+  * id : serial <<PK>>
+  --
+  * slot_id : int <<FK>>
+  * richiesta_id : int <<FK, unique>>
+  * stato : text <<da_confermare | confermata | disdetta>>
+  * creata_il : timestamp
+}
+
+entity "contatti" as contatti {
+  * id : serial <<PK>>
+  --
+  * prenotazione_id : int <<FK>>
+  * esito : text <<confermato | disdetto | non_raggiungibile>>
+  * registrato_il : timestamp
+}
+
+sedi ||--o{ slot
+sedi ||--o{ pazienti
+prestazioni ||--o{ slot
+prestazioni ||--o{ richieste
+pazienti ||--o{ richieste
+richieste ||--o| prenotazioni
+slot ||--o{ prenotazioni
+prenotazioni ||--o{ contatti
+
+note bottom of prenotazioni
+  al massimo una prenotazione
+  non disdetta per slot
+  (indice unico parziale)
+end note
+@enduml
