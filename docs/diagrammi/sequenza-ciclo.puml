@@ -1,0 +1,52 @@
+@startuml sequenza-ciclo
+skinparam sequenceMessageAlign center
+title Ciclo agentico - scenario 2: registrazione di una disdetta
+
+actor Operatore
+participant Cli
+participant Agent
+participant ": ModelProvider" as Modello
+participant McpToolClient
+participant RecallMcpServer as Server
+database PostgreSQL as DB
+
+Operatore -> Cli : "Il paziente dell'appuntamento\n5531 ha disdetto"
+Cli -> Agent : esegui(richiesta)
+
+loop finché c'è una risposta finale o si arriva a maxIterazioni
+  Agent -> Modello : chat(messaggi, tools)
+  Modello --> Agent : RispostaModello
+
+  alt il modello chiede un tool
+    note right of Agent
+      registra_esito_contatto
+      { prenotazioneId: 5531,
+        esito: "disdetto" }
+    end note
+
+    opt il tool non è di sola lettura
+      Agent -> Cli : conferma(chiamata)
+      Cli -> Operatore : mostra tool e parametri
+      Operatore --> Cli : sì
+      Cli --> Agent : true
+    end
+
+    Agent -> McpToolClient : chiamaTool(nome, args)
+    McpToolClient -> Server : tools/call
+    Server -> DB : transazione: contatto,\nprenotazione disdetta,\nrichiesta annullata
+    DB --> Server : ok
+    Server --> McpToolClient : risultato
+    McpToolClient --> Agent : risultato
+    Agent -> Agent : aggiunge il risultato\nai messaggi
+  else risposta finale, nessun tool
+    Agent --> Cli : EsitoAgente (RISPOSTA_FINALE)
+  end
+end
+
+Cli --> Operatore : "Disdetta registrata: lo slot è libero.\nVuoi cercare un sostituto?"
+
+note over Agent
+  ogni passo (richiesta al modello, tool, parametri,
+  risultato, token) va nel log JSON Lines
+end note
+@enduml
