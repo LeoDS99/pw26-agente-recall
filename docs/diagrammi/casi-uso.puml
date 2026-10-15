@@ -1,0 +1,28 @@
+@startuml casi-uso
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Operatore\ncentro prenotazioni" as Op
+actor "Responsabile\nliste d'attesa" as Resp
+
+rectangle "Agente per il recall - Gruppo Sanitario Collemare" {
+  usecase "UC1 Gestisci il\ngiro di conferme" as UC1
+  usecase UC2 as "UC2 Registra l'esito
+di un contatto
+--
+punti di estensione:
+slot liberato"
+  usecase "UC3 Recupera\nuno slot libero" as UC3
+  usecase "UC4 Pianifica il recupero\ndella settimana" as UC4
+  usecase "UC5 Verifica\ni tempi d'attesa" as UC5
+}
+
+Op --> UC1
+Op --> UC2
+Op --> UC3
+Op --> UC4
+Resp --> UC5
+
+UC1 ..> UC2 : <<include>>
+UC3 ..> UC2 : <<extend>>
+@enduml
