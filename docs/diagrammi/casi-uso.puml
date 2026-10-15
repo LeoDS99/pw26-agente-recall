@@ -16,12 +16,11 @@ slot liberato"
   usecase "UC4 Pianifica il recupero\ndella settimana" as UC4
   usecase "UC5 Verifica\ni tempi d'attesa" as UC5
 }
-
-Op --> UC1
-Op --> UC2
-Op --> UC3
-Op --> UC4
-Resp --> UC5
+Op -- UC1
+Op -- UC2
+Op -- UC3
+Op -- UC4
+Resp -- UC5
 
 UC1 ..> UC2 : <<include>>
 UC3 ..> UC2 : <<extend>>
