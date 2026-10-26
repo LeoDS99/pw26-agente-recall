@@ -39,7 +39,7 @@ entity "richieste" as richieste {
   --
   * paziente_id : int <<FK>>
   * prestazione_id : int <<FK>>
-  * classe_priorita : char <<U | B | D | P>>
+  * classe_priorita : char(1) <<U | B | D | P>>
   * data_richiesta : date
   * stato : text <<in_attesa | prenotata | annullata>>
 }

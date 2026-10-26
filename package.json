@@ -8,7 +8,8 @@
   "scripts": {
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:schema": "tsx --env-file=.env src/backend/sql/applica-schema.ts"
   },
   "repository": {
     "type": "git",
