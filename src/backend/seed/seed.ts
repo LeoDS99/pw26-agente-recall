@@ -1,6 +1,9 @@
 // Dati sintetici del Gruppo Sanitario Collemare (impresa fittizia).
-// Niente valori casuali: i dati seguono schemi fissi, quindi ogni lancio
-// produce gli stessi dati e i test sono ripetibili. Le date partono da oggi.
+// Il seed ha due parti:
+//  - dati di base, generati da regole fisse (niente valori casuali);
+//  - dati fissi degli scenari di test, segnati con "DATO FISSO": sempre gli
+//    stessi numeri e le stesse condizioni, elencati in docs/scenari-test.md.
+// Ogni lancio produce gli stessi dati, con le date calcolate da oggi.
 // Si lancia dopo schema.sql, che ricrea le tabelle vuote: npm run db:reset
 
 import type { PoolClient } from "pg";
@@ -88,7 +91,7 @@ async function seed(c: PoolClient): Promise<void> {
       [p.id, p.nome, p.tipo, p.durata]);
   }
 
-  // Pazienti: il numero 1 è Maria Rossi (richiesta 4410, scenario 10).
+  // Pazienti: il numero 1 è Maria Rossi (DATO FISSO, scenario 10: richiesta 4410).
   // Gli altri: 10 nomi x 6 cognomi; telefono con prefisso inesistente.
   const pazienti: number[] = [];
   for (let i = 1; i <= NUM_PAZIENTI; i++) {
@@ -99,7 +102,8 @@ async function seed(c: PoolClient): Promise<void> {
       [nome, cognome, `+39 000 ${String(i).padStart(7, "0")}`, (i % 3) + 1]));
   }
 
-  // Slot 812 (scenari 4, 5, 10): cardiologica al Centro tra 10 giorni, libero
+  // DATO FISSO (scenari 4, 5, 10): slot 812, cardiologica al Centro tra 10 giorni,
+  // libero. Come gli altri dati fissi, può cadere anche di domenica.
   await c.query("INSERT INTO slot (id, sede_id, prestazione_id, inizio) VALUES (812, $1, $2, $3)",
     [CENTRO, CARDIOLOGICA, dataOra(giorno(10), "12:30")]);
 
@@ -120,8 +124,8 @@ async function seed(c: PoolClient): Promise<void> {
     }
   }
 
-  // Slot che servono agli scenari
-  const s5531 = slot.find((s) => s.sede === COSTA && s.prestazione === OCULISTICA && s.scarto >= 3)!;
+  // DATI FISSI: slot dell'agenda scelti per gli scenari
+  const s5531 = slot.find((s) => s.sede === COSTA && s.prestazione === OCULISTICA && s.scarto >= 3)!;  // scenari 2, 11
   const liberiCentro = slot.filter((s) => s.sede === CENTRO && s.scarto <= 7).slice(-4);  // scenario 3
   const cardioValle = slot.filter((s) => s.sede === VALLE && s.prestazione === CARDIOLOGICA);
   const attesaBreve = cardioValle.slice(0, 2);   // scenario 13: classe B entro i 10 giorni
@@ -133,7 +137,7 @@ async function seed(c: PoolClient): Promise<void> {
     if (s === s5531 || liberiCentro.includes(s)) continue;
 
     let classe = CLASSI[i % 10];
-   let giorniPassati = 2 + (i % 4) * 10;  // richiesta fatta 2, 12, 22 o 32 giorni fa
+    let giorniPassati = 2 + (i % 4) * 10;  // richiesta fatta 2, 12, 22 o 32 giorni fa
     if (attesaBreve.includes(s)) { classe = "B"; giorniPassati = 1; }
     else if (attesaLunga.includes(s)) { classe = "B"; giorniPassati = 20; }
     else if (s.scarto >= 8 && i % 6 === 0) continue;  // libero
@@ -153,7 +157,7 @@ async function seed(c: PoolClient): Promise<void> {
     }
   }
 
-  // Prenotazione 5531 (scenari 2, 11): oculistica a Costa, da confermare
+  // DATO FISSO (scenari 2, 11): prenotazione 5531, oculistica a Costa, da confermare
   const richiesta5531 = await inserisci(c,
     `INSERT INTO richieste (paziente_id, prestazione_id, classe_priorita, data_richiesta, stato)
      VALUES ($1, $2, 'D', $3, 'prenotata')`,
@@ -163,7 +167,8 @@ async function seed(c: PoolClient): Promise<void> {
      VALUES (5531, $1, $2, 'da_confermare', $3)`,
     [s5531.id, richiesta5531, dataOra(giorno(-20), "10:00")]);
 
-  // Lista d'attesa: 6 richieste per prestazione, classi diverse (candidati per 812 e 5531)
+  // DATO FISSO (scenari 3, 4, 5, 11): lista d'attesa, 6 richieste per prestazione
+  // di classi diverse (candidati per lo slot 812 e per sostituire la 5531)
   const CLASSI_ATTESA = ["U", "B", "D", "P", "D", "P"];
   for (const p of PRESTAZIONI) {
     for (let k = 0; k < CLASSI_ATTESA.length; k++) {
@@ -174,7 +179,7 @@ async function seed(c: PoolClient): Promise<void> {
     }
   }
 
-  // Richiesta 4410 (scenario 10): Rossi, dermatologica, in attesa
+  // DATO FISSO (scenario 10): richiesta 4410, Rossi, dermatologica, in attesa
   await c.query(
     `INSERT INTO richieste (id, paziente_id, prestazione_id, classe_priorita, data_richiesta, stato)
      VALUES (4410, $1, $2, 'P', $3, 'in_attesa')`,

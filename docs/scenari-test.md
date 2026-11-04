@@ -26,5 +26,5 @@
 
 ## Regole
 - Le date dei dati fissi si calcolano rispetto al giorno in cui si popola il database.
-- Gli identificativi fissi (5531, 812, 4410) si inseriscono esplicitamente e poi si riallineano le sequenze.
+- Gli identificativi fissi (5531, 812, 4410) si inseriscono esplicitamente, con numeri più alti di tutti quelli assegnati in automatico: così non entrano mai in conflitto e non serve riallineare le sequenze.
 - Il database si ripopola prima di ogni scenario: gli scenari 2, 4 e 11 modificano dati usati da altri.
