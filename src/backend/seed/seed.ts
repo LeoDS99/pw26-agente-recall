@@ -206,6 +206,14 @@ async function seed(c: PoolClient): Promise<void> {
     let classe = CLASSI[i % 10];
     let giorniPassati = 2 + (i % 4) * 10;  // richiesta fatta 2, 12, 22 o 32 giorni fa
 
+    // Le urgenti (U, entro 72 ore) si prenotano solo nei prossimi 2 giorni,
+    // con la richiesta di ieri: come in un'azienda vera, stanno entro soglia.
+    // Più avanti nell'agenda lo slot va a una richiesta programmata (P).
+    if (classe === "U") {
+      if (s.scarto <= 2) giorniPassati = 1;
+      else classe = "P";
+    }
+
     // Eccezioni per lo scenario 13; altrimenti, dal giorno 8, uno slot su sei resta libero.
     if (attesaBreve.includes(s)) { classe = "B"; giorniPassati = 1; }        // attesa ~2 giorni: entro soglia
     else if (attesaLunga.includes(s)) { classe = "B"; giorniPassati = 20; }  // attesa oltre 30 giorni: fuori soglia

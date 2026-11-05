@@ -33,14 +33,14 @@ package "Back-end" {
     - pool : Pool
     + appuntamentiDaConfermare(giorni, sedeId?)
     + registraEsito(prenotazioneId, esito)
-    + slotLiberi(prestazioneId?, sedeId?, dal, al)
+    + slotLiberi(dal, al, prestazioneId?, sedeId?)
     + candidatiPerSlot(slotId, limite)
     + riassegnaSlot(slotId, richiestaId)
-    + tempiAttesa(prestazioneId?, classe?, dal, al)
+    + tempiAttesa(dal, al, prestazioneId?, classe?)
   }
 
   class SoglieAttesa <<config>> {
-    + giorni(classe, tipoPrestazione) : number
+    + {static} giorni(classe, tipoPrestazione) : number
   }
 }
 
