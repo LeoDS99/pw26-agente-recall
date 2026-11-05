@@ -9,7 +9,9 @@
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "typecheck": "tsc --noEmit",
-    "db:schema": "tsx --env-file=.env src/backend/sql/applica-schema.ts"
+    "db:schema": "tsx --env-file=.env src/backend/sql/applica-schema.ts",
+    "db:seed": "tsx --env-file=.env src/backend/seed/seed.ts",
+    "db:reset": "npm run db:schema && npm run db:seed"
   },
   "repository": {
     "type": "git",

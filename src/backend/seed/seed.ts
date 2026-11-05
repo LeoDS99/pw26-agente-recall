@@ -1,48 +1,70 @@
-// Dati sintetici del Gruppo Sanitario Collemare (impresa fittizia).
+// =============================================================================
+// SEED: riempie il database con dati sintetici del Gruppo Sanitario Collemare
+// (impresa fittizia). Nessun dato reale.
+//
 // Il seed ha due parti:
-//  - dati di base, generati da regole fisse (niente valori casuali);
-//  - dati fissi degli scenari di test, segnati con "DATO FISSO": sempre gli
-//    stessi numeri e le stesse condizioni, elencati in docs/scenari-test.md.
-// Ogni lancio produce gli stessi dati, con le date calcolate da oggi.
-// Si lancia dopo schema.sql, che ricrea le tabelle vuote: npm run db:reset
+//  1. DATI DI BASE: sedi, prestazioni, pazienti, agenda e prenotazioni,
+//     generati da regole fisse (niente valori casuali).
+//  2. DATI FISSI DEGLI SCENARI DI TEST, segnati con "DATO FISSO": sempre gli
+//     stessi numeri (slot 812, prenotazione 5531, richiesta 4410) e le stesse
+//     condizioni, così ogni scenario ha un esito atteso scritto in anticipo.
+//     L'elenco completo è in docs/scenari-test.md.
+//
+// Ogni lancio produce gli stessi dati. Le date non sono scritte a mano: si
+// calcolano a partire dal giorno in cui si lancia il seed.
+//
+// Come si lancia: npm run db:reset
+// (prima schema.sql ricrea le tabelle vuote, poi parte questo file)
+// =============================================================================
 
 import type { PoolClient } from "pg";
 import { pool } from "../db.js";
 
-// --- 1. Date: tutto è relativo al giorno del lancio -------------------------
+// --- 1. DATE: tutto è relativo al giorno del lancio --------------------------
 
+// Oggi a mezzanotte: è il punto di partenza di tutte le date del seed.
 const oggi = new Date();
 oggi.setHours(0, 0, 0, 0);
 
-// giorno(1) = domani, giorno(-30) = un mese fa
+// giorno(scarto): restituisce la data di oggi spostata di "scarto" giorni.
+// Esempi: giorno(1) = domani, giorno(10) = tra dieci giorni, giorno(-30) = un mese fa.
 function giorno(scarto: number): Date {
   const d = new Date(oggi);
   d.setDate(d.getDate() + scarto);
   return d;
 }
 
-// Date nel formato che PostgreSQL accetta: "2026-11-03" e "2026-11-03 09:00"
+// data(d): trasforma una data nel testo che PostgreSQL accetta, es. "2026-11-03".
+// padStart aggiunge lo zero davanti: il mese 3 diventa "03".
 function data(d: Date): string {
-  const mese = String(d.getMonth() + 1).padStart(2, "0");
+  const mese = String(d.getMonth() + 1).padStart(2, "0");  // getMonth() parte da 0
   const gg = String(d.getDate()).padStart(2, "0");
   return `${d.getFullYear()}-${mese}-${gg}`;
 }
+
+// dataOra(d, ora): come data(), con l'orario attaccato, es. "2026-11-03 09:00".
 function dataOra(d: Date, ora: string): string {
   return `${data(d)} ${ora}`;
 }
 
-// --- 2. Anagrafiche fisse e volumi ------------------------------------------
+// --- 2. COSTANTI: anagrafiche fisse e volumi ---------------------------------
 
+// Gli id di sedi e prestazioni hanno un nome, così nel codice si legge
+// CENTRO invece di 1. Il seed li inserisce proprio con questi numeri.
 const CENTRO = 1, COSTA = 2, VALLE = 3;
 const CARDIOLOGICA = 1, OCULISTICA = 2, DERMATOLOGICA = 3, ECOGRAFIA = 4, RISONANZA = 5;
 
-// Quali prestazioni offre ogni sede (tabella delle sedi in 05)
+// Le 3 sedi e le prestazioni che ognuna offre (tabella delle sedi in 05).
+// "prestazioni" non va nel database: serve solo a costruire l'agenda,
+// cioè a sapere quali slot creare in ogni sede.
 const SEDI = [
   { id: CENTRO, nome: "Collemare Centro", localita: "capoluogo", prestazioni: [CARDIOLOGICA, OCULISTICA, DERMATOLOGICA, ECOGRAFIA, RISONANZA] },
   { id: COSTA, nome: "Collemare Costa", localita: "paese sul mare", prestazioni: [CARDIOLOGICA, OCULISTICA, DERMATOLOGICA, ECOGRAFIA] },
   { id: VALLE, nome: "Collemare Valle", localita: "entroterra", prestazioni: [CARDIOLOGICA, OCULISTICA, DERMATOLOGICA] },
 ];
 
+// Le 5 prestazioni prenotabili. Il tipo (visita o esame) serve per la soglia
+// d'attesa della classe D, che è diversa per visite ed esami.
 const PRESTAZIONI = [
   { id: CARDIOLOGICA, nome: "Visita cardiologica", tipo: "visita", durata: 30 },
   { id: OCULISTICA, nome: "Visita oculistica", tipo: "visita", durata: 20 },
@@ -51,6 +73,7 @@ const PRESTAZIONI = [
   { id: RISONANZA, nome: "Risonanza magnetica articolare", tipo: "esame", durata: 45 },
 ];
 
+// Nomi e cognomi inventati, combinati tra loro per creare i pazienti.
 const NOMI = ["Marco", "Giulia", "Luca", "Francesca", "Andrea", "Chiara", "Matteo", "Sara", "Paolo", "Elena"];
 const COGNOMI = ["Bianchi", "Romano", "Colombo", "Ricci", "Marino", "Greco"];
 
@@ -64,24 +87,43 @@ const COGNOMI = ["Bianchi", "Romano", "Colombo", "Ricci", "Marino", "Greco"];
 // Qui sono assegnate a rotazione: ogni 10 prenotazioni, 1 U, 2 B, 3 D, 4 P.
 const CLASSI = ["P", "D", "B", "P", "D", "P", "B", "D", "P", "U"];
 
-const NUM_PAZIENTI = 60;      // 10 nomi x 6 cognomi
-const GIORNI_AGENDA = 14;     // da domani, domeniche escluse
-const ORARI = ["09:00", "11:00"];  // due slot al giorno per prestazione e sede
+const NUM_PAZIENTI = 60;           // 10 nomi x 6 cognomi
+const GIORNI_AGENDA = 14;          // l'agenda va da domani a tra 14 giorni
+const ORARI = ["09:00", "11:00"];  // due slot al giorno per ogni prestazione in ogni sede
 
-// --- 3. Utilità ------------------------------------------------------------
+// --- 3. UTILITÀ ----------------------------------------------------------------
 
-// Esegue un INSERT e restituisce l'id della riga creata
+// inserisci(c, sql, valori): esegue un INSERT e restituisce l'id della riga
+// appena creata (lo chiede a PostgreSQL con "RETURNING id"). Serve quando una
+// riga va collegata a un'altra: per esempio la prenotazione alla sua richiesta.
 async function inserisci(c: PoolClient, sql: string, valori: unknown[]): Promise<number> {
   const risultato = await c.query<{ id: number }>(`${sql} RETURNING id`, valori);
   return risultato.rows[0]!.id;
 }
 
+// Uno slot dell'agenda come lo ricorda il seed dopo averlo creato:
+// id nel database, sede, prestazione e "scarto" (tra quanti giorni è).
 interface Slot { id: number; sede: number; prestazione: number; scarto: number }
 
-// --- 4. Seed ---------------------------------------------------------------
+// --- 4. SEED: crea tutti i dati -------------------------------------------------
 
+// seed(c): inserisce tutti i dati, in quest'ordine:
+//   a. sedi e prestazioni
+//   b. pazienti
+//   c. slot 812 (DATO FISSO)
+//   d. agenda: tutti gli slot dei prossimi 14 giorni
+//   e. scelta degli slot che servono agli scenari (DATI FISSI)
+//   f. prenotazioni sugli slot dell'agenda
+//   g. prenotazione 5531 (DATO FISSO)
+//   h. lista d'attesa (DATO FISSO)
+//   i. richiesta 4410 (DATO FISSO)
+// "c" è una sola connessione al database: tutte le query passano di lì, così
+// stanno nella stessa transazione (vedi la parte 6 in fondo).
 async function seed(c: PoolClient): Promise<void> {
-  // Sedi e prestazioni, con id fissi
+
+  // a. SEDI E PRESTAZIONI, con l'id scritto a mano: deve coincidere con le
+  // costanti CENTRO, CARDIOLOGICA eccetera. $1, $2... sono segnaposto: i valori
+  // li passa il driver a parte, mai incollati dentro il testo SQL.
   for (const s of SEDI) {
     await c.query("INSERT INTO sedi (id, nome, localita) VALUES ($1, $2, $3)",
       [s.id, s.nome, s.localita]);
@@ -91,8 +133,12 @@ async function seed(c: PoolClient): Promise<void> {
       [p.id, p.nome, p.tipo, p.durata]);
   }
 
-  // Pazienti: il numero 1 è Maria Rossi (DATO FISSO, scenario 10: richiesta 4410).
-  // Gli altri: 10 nomi x 6 cognomi; telefono con prefisso inesistente.
+  // b. PAZIENTI: 60, con l'id assegnato dal database.
+  // Il paziente 1 è sempre Maria Rossi (DATO FISSO, scenario 10: richiesta 4410).
+  // Gli altri: l'unità di i sceglie il nome, la decina il cognome, quindi non
+  // ci sono omonimi. Il telefono ha un prefisso inesistente (+39 000).
+  // La sede di riferimento ruota tra 1, 2 e 3: 20 pazienti per sede.
+  // L'array "pazienti" tiene gli id creati: pazienti[0] è Maria Rossi.
   const pazienti: number[] = [];
   for (let i = 1; i <= NUM_PAZIENTI; i++) {
     const nome = i === 1 ? "Maria" : NOMI[i % 10];
@@ -102,16 +148,24 @@ async function seed(c: PoolClient): Promise<void> {
       [nome, cognome, `+39 000 ${String(i).padStart(7, "0")}`, (i % 3) + 1]));
   }
 
-  // DATO FISSO (scenari 4, 5, 10): slot 812, cardiologica al Centro tra 10 giorni,
-  // libero. Come gli altri dati fissi, può cadere anche di domenica.
+  // c. DATO FISSO (scenari 4, 5, 10): slot 812, cardiologica al Centro tra 10
+  // giorni, alle 12:30 (orario diverso dall'agenda, così si riconosce).
+  // Tra 10 giorni perché deve stare fuori dai "prossimi 7 giorni" dello
+  // scenario 3. Resta libero perché non entra nell'array "slot" qui sotto,
+  // e il passo f prenota solo gli slot di quell'array.
+  // Come gli altri dati fissi, può cadere anche di domenica.
   await c.query("INSERT INTO slot (id, sede_id, prestazione_id, inizio) VALUES (812, $1, $2, $3)",
     [CENTRO, CARDIOLOGICA, dataOra(giorno(10), "12:30")]);
 
-  // Agenda: da domani per 14 giorni, domeniche escluse (domani sempre, scenario 1)
+  // d. AGENDA: per ogni giorno da domani a tra 14 giorni, per ogni sede, per
+  // ogni prestazione di quella sede, per ogni orario, crea uno slot.
+  // Le domeniche si saltano (getDay() === 0 è domenica), tranne domani: così
+  // lo scenario 1 ("appuntamenti di domani") ha sempre i dati.
+  // Ogni slot creato finisce anche nell'array "slot", usato nei passi e ed f.
   const slot: Slot[] = [];
   for (let scarto = 1; scarto <= GIORNI_AGENDA; scarto++) {
     const domenica = giorno(scarto).getDay() === 0;
-    if (domenica && scarto > 1) continue;
+    if (domenica && scarto > 1) continue;  // continue = salta questo giorno
     for (const s of SEDI) {
       for (const p of s.prestazioni) {
         for (const ora of ORARI) {
@@ -124,25 +178,45 @@ async function seed(c: PoolClient): Promise<void> {
     }
   }
 
-  // DATI FISSI: slot dell'agenda scelti per gli scenari
+  // e. DATI FISSI: tra gli slot dell'agenda, mette da parte quelli che servono
+  // agli scenari. Ogni scenario usa una sede diversa, così non si disturbano.
+  //  - s5531: il primo slot di oculistica a Costa ad almeno 3 giorni da oggi.
+  //    Lì andrà la prenotazione 5531 (scenari 2, 11). Il "!" dice a TypeScript
+  //    che lo slot esiste di sicuro (Costa ha oculistica tutti i giorni).
+  //  - liberiCentro: gli ultimi 4 slot del Centro nei prossimi 7 giorni.
+  //    Resteranno liberi (scenario 3).
+  //  - attesaBreve e attesaLunga: le prime 2 e le ultime 2 cardiologiche di
+  //    Valle. Diventeranno classe B con attesa entro e oltre i 10 giorni (scenario 13).
   const s5531 = slot.find((s) => s.sede === COSTA && s.prestazione === OCULISTICA && s.scarto >= 3)!;  // scenari 2, 11
   const liberiCentro = slot.filter((s) => s.sede === CENTRO && s.scarto <= 7).slice(-4);  // scenario 3
   const cardioValle = slot.filter((s) => s.sede === VALLE && s.prestazione === CARDIOLOGICA);
   const attesaBreve = cardioValle.slice(0, 2);   // scenario 13: classe B entro i 10 giorni
   const attesaLunga = cardioValle.slice(-2);     // scenario 13: classe B oltre i 10 giorni
 
-  // Prenotazioni: nei prossimi 7 giorni tutto occupato tranne 4 slot al Centro;
-  // dopo, uno slot su sei resta libero
+  // f. PRENOTAZIONI: per ogni slot dell'agenda decide se resta libero o viene
+  // prenotato. "i" è la posizione dello slot nell'array: con il resto della
+  // divisione (%) fa ruotare classi, date e pazienti senza valori casuali.
+  // Risultato: nei prossimi 7 giorni tutto occupato tranne i 4 slot del Centro;
+  // dal giorno 8 in poi uno slot su sei resta libero.
   for (const [i, s] of slot.entries()) {
+    // La 5531 si prenota a parte (passo g); i 4 del Centro devono restare liberi.
     if (s === s5531 || liberiCentro.includes(s)) continue;
 
+    // Classe di priorità e anzianità della richiesta, a rotazione.
     let classe = CLASSI[i % 10];
     let giorniPassati = 2 + (i % 4) * 10;  // richiesta fatta 2, 12, 22 o 32 giorni fa
-    if (attesaBreve.includes(s)) { classe = "B"; giorniPassati = 1; }
-    else if (attesaLunga.includes(s)) { classe = "B"; giorniPassati = 20; }
+
+    // Eccezioni per lo scenario 13; altrimenti, dal giorno 8, uno slot su sei resta libero.
+    if (attesaBreve.includes(s)) { classe = "B"; giorniPassati = 1; }        // attesa ~2 giorni: entro soglia
+    else if (attesaLunga.includes(s)) { classe = "B"; giorniPassati = 20; }  // attesa oltre 30 giorni: fuori soglia
     else if (s.scarto >= 8 && i % 6 === 0) continue;  // libero
 
+    // Confermate solo metà delle prenotazioni dei prossimi 2 giorni: il recall
+    // si fa a ridosso dell'appuntamento. Tutte le altre sono "da confermare".
     const confermata = s.scarto <= 2 && i % 2 === 0;
+
+    // Ogni prenotazione nasce da una richiesta (la ricetta del paziente):
+    // prima la richiesta, poi la prenotazione collegata alla richiesta.
     const richiesta = await inserisci(c,
       `INSERT INTO richieste (paziente_id, prestazione_id, classe_priorita, data_richiesta, stato)
        VALUES ($1, $2, $3, $4, 'prenotata')`,
@@ -150,6 +224,8 @@ async function seed(c: PoolClient): Promise<void> {
     const prenotazione = await inserisci(c,
       `INSERT INTO prenotazioni (slot_id, richiesta_id, stato, creata_il) VALUES ($1, $2, $3, $4)`,
       [s.id, richiesta, confermata ? "confermata" : "da_confermare", dataOra(giorno(-giorniPassati), "10:00")]);
+
+    // Una prenotazione confermata ha anche la telefonata che l'ha confermata (ieri alle 16).
     if (confermata) {
       await c.query(
         "INSERT INTO contatti (prenotazione_id, esito, registrato_il) VALUES ($1, 'confermato', $2)",
@@ -157,7 +233,8 @@ async function seed(c: PoolClient): Promise<void> {
     }
   }
 
-  // DATO FISSO (scenari 2, 11): prenotazione 5531, oculistica a Costa, da confermare
+  // g. DATO FISSO (scenari 2, 11): prenotazione 5531, oculistica a Costa, da
+  // confermare. Richiesta in classe D di 20 giorni fa, paziente numero 5.
   const richiesta5531 = await inserisci(c,
     `INSERT INTO richieste (paziente_id, prestazione_id, classe_priorita, data_richiesta, stato)
      VALUES ($1, $2, 'D', $3, 'prenotata')`,
@@ -167,8 +244,10 @@ async function seed(c: PoolClient): Promise<void> {
      VALUES (5531, $1, $2, 'da_confermare', $3)`,
     [s5531.id, richiesta5531, dataOra(giorno(-20), "10:00")]);
 
-  // DATO FISSO (scenari 3, 4, 5, 11): lista d'attesa, 6 richieste per prestazione
-  // di classi diverse (candidati per lo slot 812 e per sostituire la 5531)
+  // h. DATO FISSO (scenari 3, 4, 5, 11): lista d'attesa. Per ogni prestazione,
+  // 6 richieste non ancora prenotate, con classi diverse (U, B, D, P, D, P) e
+  // date sempre più vecchie (5, 20, 35, 50, 65, 80 giorni fa). Sono i candidati
+  // per lo slot 812 e per sostituire la 5531: l'ordinamento si può verificare.
   const CLASSI_ATTESA = ["U", "B", "D", "P", "D", "P"];
   for (const p of PRESTAZIONI) {
     for (let k = 0; k < CLASSI_ATTESA.length; k++) {
@@ -179,7 +258,9 @@ async function seed(c: PoolClient): Promise<void> {
     }
   }
 
-  // DATO FISSO (scenario 10): richiesta 4410, Rossi, dermatologica, in attesa
+  // i. DATO FISSO (scenario 10): richiesta 4410, Maria Rossi, dermatologica, in
+  // attesa. È una richiesta vera ma per un'altra prestazione: lo slot 812
+  // (cardiologia) deve rifiutarla.
   await c.query(
     `INSERT INTO richieste (id, paziente_id, prestazione_id, classe_priorita, data_richiesta, stato)
      VALUES (4410, $1, $2, 'P', $3, 'in_attesa')`,
@@ -189,16 +270,26 @@ async function seed(c: PoolClient): Promise<void> {
   // automatico (qualche centinaio), quindi non entrano mai in conflitto.
 }
 
-// --- 5. Controllo: i dati degli scenari ci sono? ---------------------------
+// --- 5. CONTROLLO: i dati degli scenari ci sono? --------------------------------
 
+// controlla(c): stampa quante righe ci sono in ogni tabella e poi 7 controlli
+// sui dati fissi degli scenari. È l'autotest del seed: se un numero è diverso
+// da quello atteso, uno scenario non partirebbe dai dati giusti.
+// Valori attesi: 1, 1, 6, 1, 4, 4 e "4 / 8" (l'ultimo può variare col giorno
+// della settimana: di sabato esce "4 / 9").
 async function controlla(c: PoolClient): Promise<void> {
+  // conta(sql): esegue "SELECT count(*) ..." e restituisce il numero.
   const conta = async (sql: string, valori: unknown[] = []) =>
     (await c.query<{ n: number }>(`SELECT count(*)::int AS n ${sql}`, valori)).rows[0]!.n;
+  // Condizione SQL "slot libero": nessuna prenotazione attiva (non disdetta) su quello slot.
   const libero = "NOT EXISTS (SELECT 1 FROM prenotazioni p WHERE p.slot_id = s.id AND p.stato <> 'disdetta')";
 
+  // Righe per tabella
   for (const t of ["sedi", "prestazioni", "pazienti", "slot", "richieste", "prenotazioni", "contatti"]) {
     console.log(`${t.padEnd(13)} ${await conta(`FROM ${t}`)}`);
   }
+
+  // Dati degli scenari
   console.log("--- dati degli scenari");
   console.log("prenotazione 5531 da confermare:",
     await conta("FROM prenotazioni WHERE id = 5531 AND stato = 'da_confermare'"));
@@ -213,6 +304,7 @@ async function controlla(c: PoolClient): Promise<void> {
   console.log("slot liberi al Centro nei prossimi 7 giorni:",
     await conta(`FROM slot s WHERE s.sede_id = ${CENTRO} AND s.inizio >= $1 AND s.inizio < $2 AND ${libero}`,
       [data(giorno(1)), data(giorno(8))]));
+  // Attesa = data dello slot meno data della richiesta, confrontata con la soglia B (10 giorni).
   const cardioB = `FROM prenotazioni p JOIN slot s ON s.id = p.slot_id JOIN richieste r ON r.id = p.richiesta_id
                    WHERE r.prestazione_id = ${CARDIOLOGICA} AND r.classe_priorita = 'B'`;
   console.log("cardiologiche B entro / oltre 10 giorni d'attesa:",
@@ -220,8 +312,15 @@ async function controlla(c: PoolClient): Promise<void> {
     await conta(`${cardioB} AND s.inizio::date - r.data_richiesta > 10`));
 }
 
-// --- 6. Tutto in una transazione: o passa tutto, o non resta niente ------------
+// --- 6. AVVIO: tutto in una transazione --------------------------------------------
 
+// Qui parte il programma. Prende una connessione dal pool e:
+//  - BEGIN apre la transazione;
+//  - seed() inserisce tutti i dati;
+//  - COMMIT li rende definitivi, poi controlla() stampa il riepilogo.
+// Se qualcosa va storto, ROLLBACK annulla tutto: il database resta vuoto,
+// mai riempito a metà. Alla fine (finally) la connessione torna al pool e il
+// pool si chiude: senza pool.end() il programma resterebbe acceso.
 const client = await pool.connect();
 try {
   await client.query("BEGIN");
