@@ -3,9 +3,7 @@
 // giorni dalla richiesta la prestazione va erogata. Fonti complete nell'elaborato.
 // Le soglie stanno nel codice e non nel database: sono regole fisse.
 
-// I valori ammessi, gli stessi dei CHECK in schema.sql.
-export type ClassePriorita = "U" | "B" | "D" | "P";
-export type TipoPrestazione = "visita" | "esame";
+import type { ClassePriorita, TipoPrestazione } from "./tipi.js";
 
 export class SoglieAttesa {
   // Tabella delle soglie in giorni. Solo la classe D cambia tra visite

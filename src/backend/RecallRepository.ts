@@ -4,57 +4,20 @@
 // riassegnazioni valide, tempi d'attesa), così non dipendono dal modello.
 
 import type { Pool } from "pg";
-
-import { SoglieAttesa, type ClassePriorita, type TipoPrestazione } from "./SoglieAttesa.js";
-
-// Errore di dominio: la richiesta viola una regola del processo (slot che non
-// esiste, slot già occupato, richiesta non valida). Il tool lo restituirà al
-// modello come messaggio chiaro; gli altri errori (es. database spento) no.
-export class ErroreDominio extends Error {}
-
-// Una riga del risultato di appuntamentiDaConfermare.
-export interface AppuntamentoDaConfermare {
-  prenotazioneId: number;
-  paziente: string;      // nome e cognome
-  telefono: string;
-  prestazione: string;
-  sede: string;
-  inizio: string;        // "2026-11-06 11:00", testo già leggibile
-}
-
-// Una riga del risultato di slotLiberi.
-export interface SlotLibero {
-  slotId: number;
-  prestazione: string;
-  sede: string;
-  inizio: string;        // "2026-11-12 09:00"
-}
-
-// Un paziente in lista d'attesa che si può chiamare per uno slot.
-export interface Candidato {
-  richiestaId: number;
-  paziente: string;
-  telefono: string;
-  classePriorita: ClassePriorita;  // U, B, D o P
-  dataRichiesta: string;   // "2026-10-16"
-  stessaSede: boolean;     // la sede di riferimento del paziente è quella dello slot
-}
-
-// Risultato di candidatiPerSlot: lo slot e i candidati in ordine.
-export interface CandidatiSlot {
-  slotId: number;
-  candidati: Candidato[];
-}
-
-// Una riga del risultato di tempiAttesa: per una prestazione e una classe,
-// quante prenotazioni rispettano la soglia e quante no.
-export interface TempiAttesa {
-  prestazione: string;
-  classePriorita: ClassePriorita;
-  sogliaGiorni: number;
-  entroSoglia: number;
-  fuoriSoglia: number;
-}
+import { ErroreDominio } from "./ErroreDominio.js";
+import { SoglieAttesa } from "./SoglieAttesa.js";
+import type {
+  AppuntamentoDaConfermare,
+  SlotLibero,
+  Candidato,
+  CandidatiSlot,
+  TempiAttesa,
+  ClassePriorita,
+  TipoPrestazione,
+  EsitoContatto,
+  EsitoRegistrato,
+  Riassegnazione,
+} from "./tipi.js";
 
 export class RecallRepository {
   // Il pool di connessioni arriva da fuori (dal server MCP), non è creato qui.
@@ -200,5 +163,123 @@ export class RecallRepository {
       else g.fuoriSoglia++;
     }
     return [...gruppi.values()];
+  }
+  // Registra l'esito di una telefonata su una prenotazione:
+  //  - confermato: la prenotazione diventa "confermata";
+  //  - disdetto: la prenotazione diventa "disdetta", la richiesta "annullata"
+  //    e lo slot torna libero (lo slot non ha uno stato: è libero perché non
+  //    ha più prenotazioni attive);
+  //  - non_raggiungibile: lo stato non cambia, resta solo la traccia.
+  // In ogni caso la telefonata viene salvata in "contatti".
+  // Tutto in una transazione: o si salvano tutte le modifiche, o nessuna.
+  async registraEsito(prenotazioneId: number, esito: EsitoContatto): Promise<EsitoRegistrato> {
+    const c = await this.pool.connect();  // una connessione sola per la transazione
+    try {
+      await c.query("BEGIN");
+
+      // FOR UPDATE blocca la riga fino alla fine della transazione: se due
+      // operatori registrano un esito sulla stessa prenotazione, il secondo aspetta.
+      const pren = await c.query<{ slot_id: number; richiesta_id: number; stato: string }>(
+        "SELECT slot_id, richiesta_id, stato FROM prenotazioni WHERE id = $1 FOR UPDATE",
+        [prenotazioneId]);
+      const p = pren.rows[0];
+      if (!p) throw new ErroreDominio(`La prenotazione ${prenotazioneId} non esiste.`);
+      if (p.stato === "disdetta") throw new ErroreDominio(`La prenotazione ${prenotazioneId} è già disdetta.`);
+
+      await c.query("INSERT INTO contatti (prenotazione_id, esito) VALUES ($1, $2)",
+        [prenotazioneId, esito]);
+
+      let stato = p.stato;
+      if (esito === "confermato") stato = "confermata";
+      if (esito === "disdetto") {
+        stato = "disdetta";
+        await c.query("UPDATE richieste SET stato = 'annullata' WHERE id = $1", [p.richiesta_id]);
+      }
+      await c.query("UPDATE prenotazioni SET stato = $2 WHERE id = $1", [prenotazioneId, stato]);
+
+      await c.query("COMMIT");
+      return { prenotazioneId, esito, statoPrenotazione: stato, slotLiberato: esito === "disdetto", slotId: p.slot_id };
+    } catch (errore) {
+      await c.query("ROLLBACK");  // annulla tutto quello fatto dopo BEGIN
+      throw errore;
+    } finally {
+      c.release();                // la connessione torna al pool
+    }
+  }
+
+  // Prenota uno slot libero per una richiesta in lista d'attesa.
+  // Regole di dominio (se una non è rispettata: ErroreDominio con il motivo):
+  //  - lo slot esiste, non è passato ed è libero;
+  //  - la richiesta esiste ed è in attesa;
+  //  - richiesta e slot sono per la stessa prestazione (scenario 10).
+  // Non obbliga a scegliere il primo candidato: l'ordine è un suggerimento.
+  // La prenotazione nasce "confermata": l'operatore ha appena parlato con il
+  // paziente, che ha accettato. Per questo si salva anche la telefonata.
+  async riassegnaSlot(slotId: number, richiestaId: number): Promise<Riassegnazione> {
+    const c = await this.pool.connect();
+    try {
+      await c.query("BEGIN");
+
+      // Lo slot, bloccato (FOR UPDATE) fino alla fine: due riassegnazioni
+      // sullo stesso slot non possono passare insieme.
+      const slot = await c.query<{ prestazione_id: number; prestazione: string; inizio: string; passato: boolean; occupato: boolean }>(
+        `SELECT s.prestazione_id,
+                pr.nome AS prestazione,
+                to_char(s.inizio, 'YYYY-MM-DD HH24:MI') AS inizio,
+                s.inizio <= localtimestamp AS passato,
+                EXISTS (SELECT 1 FROM prenotazioni p
+                         WHERE p.slot_id = s.id AND p.stato <> 'disdetta') AS occupato
+           FROM slot s
+           JOIN prestazioni pr ON pr.id = s.prestazione_id
+          WHERE s.id = $1
+            FOR UPDATE OF s`,
+        [slotId]);
+      const s = slot.rows[0];
+      if (!s) throw new ErroreDominio(`Lo slot ${slotId} non esiste.`);
+      if (s.passato) throw new ErroreDominio(`Lo slot ${slotId} è già passato.`);
+      if (s.occupato) throw new ErroreDominio(`Lo slot ${slotId} non è libero.`);
+
+      // La richiesta, bloccata anche lei.
+      const rich = await c.query<{ prestazione_id: number; prestazione: string; stato: string; paziente: string }>(
+        `SELECT r.prestazione_id,
+                pr.nome AS prestazione,
+                r.stato,
+                pa.nome || ' ' || pa.cognome AS paziente
+           FROM richieste r
+           JOIN prestazioni pr ON pr.id = r.prestazione_id
+           JOIN pazienti pa    ON pa.id = r.paziente_id
+          WHERE r.id = $1
+            FOR UPDATE OF r`,
+        [richiestaId]);
+      const r = rich.rows[0];
+      if (!r) throw new ErroreDominio(`La richiesta ${richiestaId} non esiste.`);
+      if (r.stato !== "in_attesa") {
+        throw new ErroreDominio(`La richiesta ${richiestaId} non è in lista d'attesa (stato: ${r.stato}).`);
+      }
+      if (r.prestazione_id !== s.prestazione_id) {
+        throw new ErroreDominio(`La richiesta ${richiestaId} è per "${r.prestazione}", lo slot ${slotId} è per "${s.prestazione}".`);
+      }
+
+      // Tutto ok: nuova prenotazione, telefonata salvata, richiesta prenotata.
+      const pren = await c.query<{ id: number }>(
+        "INSERT INTO prenotazioni (slot_id, richiesta_id, stato) VALUES ($1, $2, 'confermata') RETURNING id",
+        [slotId, richiestaId]);
+      const prenotazioneId = pren.rows[0]!.id;
+      await c.query("INSERT INTO contatti (prenotazione_id, esito) VALUES ($1, 'confermato')", [prenotazioneId]);
+      await c.query("UPDATE richieste SET stato = 'prenotata' WHERE id = $1", [richiestaId]);
+
+      await c.query("COMMIT");
+      return { prenotazioneId, slotId, richiestaId, paziente: r.paziente, inizio: s.inizio, stato: "confermata" };
+    } catch (errore) {
+      await c.query("ROLLBACK");
+      // 23505 = violazione di unicità: è scattato l'indice unico parziale di
+      // schema.sql (ultima difesa contro le doppie prenotazioni).
+      if ((errore as { code?: string }).code === "23505") {
+        throw new ErroreDominio(`Lo slot ${slotId} o la richiesta ${richiestaId} sono stati appena prenotati da un'altra operazione.`);
+      }
+      throw errore;
+    } finally {
+      c.release();
+    }
   }
 }
