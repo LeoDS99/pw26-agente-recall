@@ -2,12 +2,18 @@
 // Si lancia con: npx tsx --env-file=.env src/mcp-server/index.ts
 // (di solito lo avvia il client: MCP Inspector o l'harness).
 
-import { pool } from '../backend/db.js';
-import { RecallRepository } from '../backend/RecallRepository.js';
-import { RecallMcpServer } from './RecallMcpServer.js';
-import { ProponiCandidati } from './tools/ProponiCandidati.js';
-import { SlotLiberi } from './tools/SlotLiberi.js';
+import { pool } from "../backend/db.js";
+import { RecallRepository } from "../backend/RecallRepository.js";
+import { RecallMcpServer } from "./RecallMcpServer.js";
+import { AppuntamentiDaConfermare } from "./tools/AppuntamentiDaConfermare.js";
+import { ProponiCandidati } from "./tools/ProponiCandidati.js";
+import { SlotLiberi } from "./tools/SlotLiberi.js";
 
 const repo = new RecallRepository(pool);
 
-new RecallMcpServer([new ProponiCandidati(repo), new SlotLiberi(repo)]).avvia();
+// I tool esposti dal server: per aggiungerne uno basta una riga qui.
+new RecallMcpServer([
+  new AppuntamentiDaConfermare(repo),
+  new ProponiCandidati(repo),
+  new SlotLiberi(repo),
+]).avvia();
