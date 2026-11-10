@@ -19,6 +19,11 @@
 
 import type { PoolClient } from "pg";
 import { pool } from "../db.js";
+import {
+  CENTRO, COSTA, VALLE,
+  CARDIOLOGICA, OCULISTICA, DERMATOLOGICA,
+  SEDI, PRESTAZIONI,
+} from "../catalogo.js";
 
 // --- 1. DATE: tutto è relativo al giorno del lancio --------------------------
 
@@ -49,29 +54,7 @@ function dataOra(d: Date, ora: string): string {
 
 // --- 2. COSTANTI: anagrafiche fisse e volumi ---------------------------------
 
-// Gli id di sedi e prestazioni hanno un nome, così nel codice si legge
-// CENTRO invece di 1. Il seed li inserisce proprio con questi numeri.
-const CENTRO = 1, COSTA = 2, VALLE = 3;
-const CARDIOLOGICA = 1, OCULISTICA = 2, DERMATOLOGICA = 3, ECOGRAFIA = 4, RISONANZA = 5;
-
-// Le 3 sedi e le prestazioni che ognuna offre (tabella delle sedi in 05).
-// "prestazioni" non va nel database: serve solo a costruire l'agenda,
-// cioè a sapere quali slot creare in ogni sede.
-const SEDI = [
-  { id: CENTRO, nome: "Collemare Centro", localita: "capoluogo", prestazioni: [CARDIOLOGICA, OCULISTICA, DERMATOLOGICA, ECOGRAFIA, RISONANZA] },
-  { id: COSTA, nome: "Collemare Costa", localita: "paese sul mare", prestazioni: [CARDIOLOGICA, OCULISTICA, DERMATOLOGICA, ECOGRAFIA] },
-  { id: VALLE, nome: "Collemare Valle", localita: "entroterra", prestazioni: [CARDIOLOGICA, OCULISTICA, DERMATOLOGICA] },
-];
-
-// Le 5 prestazioni prenotabili. Il tipo (visita o esame) serve per la soglia
-// d'attesa della classe D, che è diversa per visite ed esami.
-const PRESTAZIONI = [
-  { id: CARDIOLOGICA, nome: "Visita cardiologica", tipo: "visita", durata: 30 },
-  { id: OCULISTICA, nome: "Visita oculistica", tipo: "visita", durata: 20 },
-  { id: DERMATOLOGICA, nome: "Visita dermatologica", tipo: "visita", durata: 20 },
-  { id: ECOGRAFIA, nome: "Ecografia addome completo", tipo: "esame", durata: 30 },
-  { id: RISONANZA, nome: "Risonanza magnetica articolare", tipo: "esame", durata: 45 },
-];
+// Sedi e prestazioni (con i loro id) stanno in catalogo.ts, importato sopra.
 
 // Nomi e cognomi inventati, combinati tra loro per creare i pazienti.
 const NOMI = ["Marco", "Giulia", "Luca", "Francesca", "Andrea", "Chiara", "Matteo", "Sara", "Paolo", "Elena"];
