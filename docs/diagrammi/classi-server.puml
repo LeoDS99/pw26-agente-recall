@@ -8,7 +8,8 @@ class McpServer <<SDK>>
 class RecallMcpServer {
   - server : McpServer
   - tools : RecallTool[]
-  + avvia() : Promise<void>
+  - registra(tool : RecallTool)
+  + avvia()
 }
 
 abstract class RecallTool {
@@ -18,7 +19,7 @@ abstract class RecallTool {
   + schemaOutput : ZodSchema
   + soloLettura : boolean
   # repo : RecallRepository
-  + {abstract} esegui(args) : Promise<RisultatoTool>
+  + {abstract} esegui(args) : Promise<dati>
 }
 
 class AppuntamentiDaConfermare
@@ -42,6 +43,8 @@ package "Back-end" {
   class SoglieAttesa <<config>> {
     + {static} giorni(classe, tipoPrestazione) : number
   }
+
+  class ErroreDominio
 }
 
 RecallMcpServer --> McpServer
@@ -54,4 +57,6 @@ RecallTool <|-- RiassegnaSlot
 RecallTool <|-- VerificaTempiAttesa
 RecallTool --> RecallRepository
 RecallRepository ..> SoglieAttesa
+RecallRepository ..> ErroreDominio : lancia
+RecallMcpServer ..> ErroreDominio : gestisce
 @enduml
