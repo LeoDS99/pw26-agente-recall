@@ -3,11 +3,8 @@
 
 import * as z from "zod/v4";
 import { NOMI_PRESTAZIONI, NOMI_SEDI, idPrestazione, idSede } from "../../backend/catalogo.js";
-import { ErroreDominio } from "../../backend/ErroreDominio.js";
+import { GIORNI_PREDEFINITI, dataFinale } from "../date.js";
 import { RecallTool } from "../RecallTool.js";
-
-// Se manca la data finale, si cercano gli slot dei 30 giorni dopo "dal".
-const GIORNI_PREDEFINITI = 30;
 
 // z.iso.date() accetta solo date vere nel formato AAAA-MM-GG: il 31 febbraio
 // viene rifiutato qui, prima di arrivare al database (scenario 9).
@@ -45,10 +42,8 @@ export class SlotLiberi extends RecallTool<typeof schemaInput, typeof schemaOutp
   readonly soloLettura = true;
 
   async esegui(args: z.infer<typeof schemaInput>): Promise<z.infer<typeof schemaOutput>> {
-    const al = args.al ?? giorniDopo(args.dal, GIORNI_PREDEFINITI);
-    if (al < args.dal) {
-      throw new ErroreDominio(`La data finale (${al}) viene prima di quella iniziale (${args.dal}).`);
-    }
+    // Se "al" manca vale 30 giorni dopo "dal"; un intervallo al contrario è rifiutato.
+    const al = dataFinale(args.dal, args.al);
 
     // Dai nomi agli id, solo se il filtro c'è.
     const prestazioneId = args.prestazione ? idPrestazione(args.prestazione) : undefined;
@@ -56,11 +51,4 @@ export class SlotLiberi extends RecallTool<typeof schemaInput, typeof schemaOutp
 
     return { slot: await this.repo.slotLiberi(args.dal, al, prestazioneId, sedeId) };
   }
-}
-
-// "2026-11-12" più 30 giorni = "2026-12-12"
-function giorniDopo(data: string, giorni: number): string {
-  const d = new Date(data); // una data senza orario è letta come UTC
-  d.setUTCDate(d.getUTCDate() + giorni);
-  return d.toISOString().slice(0, 10); // di nuovo AAAA-MM-GG
 }
