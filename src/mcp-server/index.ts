@@ -7,14 +7,19 @@ import { RecallRepository } from "../backend/RecallRepository.js";
 import { RecallMcpServer } from "./RecallMcpServer.js";
 import { AppuntamentiDaConfermare } from "./tools/AppuntamentiDaConfermare.js";
 import { ProponiCandidati } from "./tools/ProponiCandidati.js";
+import { RegistraEsitoContatto } from "./tools/RegistraEsitoContatto.js";
+import { RiassegnaSlot } from "./tools/RiassegnaSlot.js";
 import { SlotLiberi } from "./tools/SlotLiberi.js";
 import { VerificaTempiAttesa } from "./tools/VerificaTempiAttesa.js";
+
 const repo = new RecallRepository(pool);
 
 // I tool esposti dal server: per aggiungerne uno basta una riga qui.
 new RecallMcpServer([
   new AppuntamentiDaConfermare(repo),
   new ProponiCandidati(repo),
+  new RegistraEsitoContatto(repo),
+  new RiassegnaSlot(repo),
   new SlotLiberi(repo),
   new VerificaTempiAttesa(repo),
 ]).avvia();
