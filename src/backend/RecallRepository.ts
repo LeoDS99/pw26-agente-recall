@@ -49,7 +49,8 @@ export class RecallRepository {
           AND s.inizio <  current_date + 1 + $1::int
           AND ($2::int IS NULL OR s.sede_id = $2)
         ORDER BY s.inizio, se.nome`,
-      [giorni, sedeId ?? null]);
+      [giorni, sedeId ?? null],
+    );
     return rows;
   }
 
@@ -74,7 +75,8 @@ export class RecallRepository {
           AND NOT EXISTS (SELECT 1 FROM prenotazioni p
                            WHERE p.slot_id = s.id AND p.stato <> 'disdetta')
         ORDER BY s.inizio, se.nome, pr.nome`,
-      [dal, al, prestazioneId ?? null, sedeId ?? null]);
+      [dal, al, prestazioneId ?? null, sedeId ?? null],
+    );
     return rows;
   }
 
@@ -92,7 +94,8 @@ export class RecallRepository {
                        WHERE p.slot_id = s.id AND p.stato <> 'disdetta') AS occupato
          FROM slot s
         WHERE s.id = $1`,
-      [slotId]);
+      [slotId],
+    );
     const s = slot.rows[0];
     if (!s) throw new ErroreDominio(`Lo slot ${slotId} non esiste.`);
     if (s.occupato) throw new ErroreDominio(`Lo slot ${slotId} non è libero.`);
@@ -116,17 +119,23 @@ export class RecallRepository {
                  pa.sede_riferimento_id = $2 DESC,
                  r.id
         LIMIT $3`,
-      [s.prestazione_id, s.sede_id, limite]);
+      [s.prestazione_id, s.sede_id, limite],
+    );
     return { slotId, candidati: rows };
   }
-    // Tempi d'attesa delle prenotazioni attive con appuntamento tra "dal" e "al".
+  // Tempi d'attesa delle prenotazioni attive con appuntamento tra "dal" e "al".
   // Attesa = giorno dell'appuntamento meno giorno della richiesta.
   // Filtri facoltativi: prestazione e classe di priorità.
   // La soglia viene da SoglieAttesa (codice), non dal database: per questo
   // il conteggio entro/fuori si fa qui in TypeScript e non in SQL.
   async tempiAttesa(dal: string, al: string, prestazioneId?: number, classe?: ClassePriorita): Promise<TempiAttesa[]> {
     // Una riga per prenotazione: prestazione, tipo, classe e giorni d'attesa.
-    const { rows } = await this.pool.query<{ prestazione: string; tipo: TipoPrestazione; classe: ClassePriorita; attesa: number }>(
+    const { rows } = await this.pool.query<{
+      prestazione: string;
+      tipo: TipoPrestazione;
+      classe: ClassePriorita;
+      attesa: number;
+    }>(
       `SELECT pr.nome AS prestazione,
               pr.tipo,
               r.classe_priorita AS classe,
@@ -141,7 +150,8 @@ export class RecallRepository {
           AND ($3::int IS NULL OR r.prestazione_id = $3)
           AND ($4::text IS NULL OR r.classe_priorita = $4)
         ORDER BY pr.id, array_position(ARRAY['U', 'B', 'D', 'P'], r.classe_priorita::text)`,
-      [dal, al, prestazioneId ?? null, classe ?? null]);
+      [dal, al, prestazioneId ?? null, classe ?? null],
+    );
 
     // Raggruppa per prestazione e classe e conta entro/fuori soglia.
     // La Map tiene l'ordine di inserimento, quindi quello della query.
@@ -173,7 +183,7 @@ export class RecallRepository {
   // In ogni caso la telefonata viene salvata in "contatti".
   // Tutto in una transazione: o si salvano tutte le modifiche, o nessuna.
   async registraEsito(prenotazioneId: number, esito: EsitoContatto): Promise<EsitoRegistrato> {
-    const c = await this.pool.connect();  // una connessione sola per la transazione
+    const c = await this.pool.connect(); // una connessione sola per la transazione
     try {
       await c.query("BEGIN");
 
@@ -181,13 +191,13 @@ export class RecallRepository {
       // operatori registrano un esito sulla stessa prenotazione, il secondo aspetta.
       const pren = await c.query<{ slot_id: number; richiesta_id: number; stato: string }>(
         "SELECT slot_id, richiesta_id, stato FROM prenotazioni WHERE id = $1 FOR UPDATE",
-        [prenotazioneId]);
+        [prenotazioneId],
+      );
       const p = pren.rows[0];
       if (!p) throw new ErroreDominio(`La prenotazione ${prenotazioneId} non esiste.`);
       if (p.stato === "disdetta") throw new ErroreDominio(`La prenotazione ${prenotazioneId} è già disdetta.`);
 
-      await c.query("INSERT INTO contatti (prenotazione_id, esito) VALUES ($1, $2)",
-        [prenotazioneId, esito]);
+      await c.query("INSERT INTO contatti (prenotazione_id, esito) VALUES ($1, $2)", [prenotazioneId, esito]);
 
       let stato = p.stato;
       if (esito === "confermato") stato = "confermata";
@@ -200,10 +210,10 @@ export class RecallRepository {
       await c.query("COMMIT");
       return { prenotazioneId, esito, statoPrenotazione: stato, slotLiberato: esito === "disdetto", slotId: p.slot_id };
     } catch (errore) {
-      await c.query("ROLLBACK");  // annulla tutto quello fatto dopo BEGIN
+      await c.query("ROLLBACK"); // annulla tutto quello fatto dopo BEGIN
       throw errore;
     } finally {
-      c.release();                // la connessione torna al pool
+      c.release(); // la connessione torna al pool
     }
   }
 
@@ -222,7 +232,13 @@ export class RecallRepository {
 
       // Lo slot, bloccato (FOR UPDATE) fino alla fine: due riassegnazioni
       // sullo stesso slot non possono passare insieme.
-      const slot = await c.query<{ prestazione_id: number; prestazione: string; inizio: string; passato: boolean; occupato: boolean }>(
+      const slot = await c.query<{
+        prestazione_id: number;
+        prestazione: string;
+        inizio: string;
+        passato: boolean;
+        occupato: boolean;
+      }>(
         `SELECT s.prestazione_id,
                 pr.nome AS prestazione,
                 to_char(s.inizio, 'YYYY-MM-DD HH24:MI') AS inizio,
@@ -233,7 +249,8 @@ export class RecallRepository {
            JOIN prestazioni pr ON pr.id = s.prestazione_id
           WHERE s.id = $1
             FOR UPDATE OF s`,
-        [slotId]);
+        [slotId],
+      );
       const s = slot.rows[0];
       if (!s) throw new ErroreDominio(`Lo slot ${slotId} non esiste.`);
       if (s.passato) throw new ErroreDominio(`Lo slot ${slotId} è già passato.`);
@@ -250,20 +267,24 @@ export class RecallRepository {
            JOIN pazienti pa    ON pa.id = r.paziente_id
           WHERE r.id = $1
             FOR UPDATE OF r`,
-        [richiestaId]);
+        [richiestaId],
+      );
       const r = rich.rows[0];
       if (!r) throw new ErroreDominio(`La richiesta ${richiestaId} non esiste.`);
       if (r.stato !== "in_attesa") {
         throw new ErroreDominio(`La richiesta ${richiestaId} non è in lista d'attesa (stato: ${r.stato}).`);
       }
       if (r.prestazione_id !== s.prestazione_id) {
-        throw new ErroreDominio(`La richiesta ${richiestaId} è per "${r.prestazione}", lo slot ${slotId} è per "${s.prestazione}".`);
+        throw new ErroreDominio(
+          `La richiesta ${richiestaId} è per "${r.prestazione}", lo slot ${slotId} è per "${s.prestazione}".`,
+        );
       }
 
       // Tutto ok: nuova prenotazione, telefonata salvata, richiesta prenotata.
       const pren = await c.query<{ id: number }>(
         "INSERT INTO prenotazioni (slot_id, richiesta_id, stato) VALUES ($1, $2, 'confermata') RETURNING id",
-        [slotId, richiestaId]);
+        [slotId, richiestaId],
+      );
       const prenotazioneId = pren.rows[0]!.id;
       await c.query("INSERT INTO contatti (prenotazione_id, esito) VALUES ($1, 'confermato')", [prenotazioneId]);
       await c.query("UPDATE richieste SET stato = 'prenotata' WHERE id = $1", [richiestaId]);
@@ -275,7 +296,9 @@ export class RecallRepository {
       // 23505 = violazione di unicità: è scattato l'indice unico parziale di
       // schema.sql (ultima difesa contro le doppie prenotazioni).
       if ((errore as { code?: string }).code === "23505") {
-        throw new ErroreDominio(`Lo slot ${slotId} o la richiesta ${richiestaId} sono stati appena prenotati da un'altra operazione.`);
+        throw new ErroreDominio(
+          `Lo slot ${slotId} o la richiesta ${richiestaId} sono stati appena prenotati da un'altra operazione.`,
+        );
       }
       throw errore;
     } finally {

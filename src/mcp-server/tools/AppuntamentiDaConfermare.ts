@@ -7,21 +7,22 @@ import { NOMI_SEDI, idSede } from "../../backend/catalogo.js";
 import { RecallTool } from "../RecallTool.js";
 
 const schemaInput = z.object({
-  giorni: z.number().int().min(1).max(14)
-    .describe("Quanti giorni guardare, a partire da domani (1 = solo domani)"),
+  giorni: z.number().int().min(1).max(14).describe("Quanti giorni guardare, a partire da domani (1 = solo domani)"),
   sede: z.enum(NOMI_SEDI).optional().describe("Solo questa sede (se manca: tutte)"),
 });
 
 // Il risultato MCP deve essere un oggetto: l'elenco sta nel campo "appuntamenti".
 const schemaOutput = z.object({
-  appuntamenti: z.array(z.object({
-    prenotazioneId: z.number(),
-    paziente: z.string(),
-    telefono: z.string(),
-    prestazione: z.string(),
-    sede: z.string(),
-    inizio: z.string(),
-  })),
+  appuntamenti: z.array(
+    z.object({
+      prenotazioneId: z.number(),
+      paziente: z.string(),
+      telefono: z.string(),
+      prestazione: z.string(),
+      sede: z.string(),
+      inizio: z.string(),
+    }),
+  ),
 });
 
 export class AppuntamentiDaConfermare extends RecallTool<typeof schemaInput, typeof schemaOutput> {

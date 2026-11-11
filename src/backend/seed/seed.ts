@@ -19,11 +19,7 @@
 
 import type { PoolClient } from "pg";
 import { pool } from "../db.js";
-import {
-  CENTRO, COSTA, VALLE,
-  CARDIOLOGICA, OCULISTICA, DERMATOLOGICA,
-  SEDI, PRESTAZIONI,
-} from "../catalogo.js";
+import { CENTRO, COSTA, VALLE, CARDIOLOGICA, OCULISTICA, DERMATOLOGICA, SEDI, PRESTAZIONI } from "../catalogo.js";
 
 // --- 1. DATE: tutto è relativo al giorno del lancio --------------------------
 
@@ -42,7 +38,7 @@ function giorno(scarto: number): Date {
 // data(d): trasforma una data nel testo che PostgreSQL accetta, es. "2026-11-03".
 // padStart aggiunge lo zero davanti: il mese 3 diventa "03".
 function data(d: Date): string {
-  const mese = String(d.getMonth() + 1).padStart(2, "0");  // getMonth() parte da 0
+  const mese = String(d.getMonth() + 1).padStart(2, "0"); // getMonth() parte da 0
   const gg = String(d.getDate()).padStart(2, "0");
   return `${d.getFullYear()}-${mese}-${gg}`;
 }
@@ -70,9 +66,9 @@ const COGNOMI = ["Bianchi", "Romano", "Colombo", "Ricci", "Marino", "Greco"];
 // Qui sono assegnate a rotazione: ogni 10 prenotazioni, 1 U, 2 B, 3 D, 4 P.
 const CLASSI = ["P", "D", "B", "P", "D", "P", "B", "D", "P", "U"];
 
-const NUM_PAZIENTI = 60;           // 10 nomi x 6 cognomi
-const GIORNI_AGENDA = 14;          // l'agenda va da domani a tra 14 giorni
-const ORARI = ["09:00", "11:00"];  // due slot al giorno per ogni prestazione in ogni sede
+const NUM_PAZIENTI = 60; // 10 nomi x 6 cognomi
+const GIORNI_AGENDA = 14; // l'agenda va da domani a tra 14 giorni
+const ORARI = ["09:00", "11:00"]; // due slot al giorno per ogni prestazione in ogni sede
 
 // --- 3. UTILITÀ ----------------------------------------------------------------
 
@@ -86,7 +82,12 @@ async function inserisci(c: PoolClient, sql: string, valori: unknown[]): Promise
 
 // Uno slot dell'agenda come lo ricorda il seed dopo averlo creato:
 // id nel database, sede, prestazione e "scarto" (tra quanti giorni è).
-interface Slot { id: number; sede: number; prestazione: number; scarto: number }
+interface Slot {
+  id: number;
+  sede: number;
+  prestazione: number;
+  scarto: number;
+}
 
 // --- 4. SEED: crea tutti i dati -------------------------------------------------
 
@@ -103,17 +104,19 @@ interface Slot { id: number; sede: number; prestazione: number; scarto: number }
 // "c" è una sola connessione al database: tutte le query passano di lì, così
 // stanno nella stessa transazione (vedi la parte 6 in fondo).
 async function seed(c: PoolClient): Promise<void> {
-
   // a. SEDI E PRESTAZIONI, con l'id scritto a mano: deve coincidere con le
   // costanti CENTRO, CARDIOLOGICA eccetera. $1, $2... sono segnaposto: i valori
   // li passa il driver a parte, mai incollati dentro il testo SQL.
   for (const s of SEDI) {
-    await c.query("INSERT INTO sedi (id, nome, localita) VALUES ($1, $2, $3)",
-      [s.id, s.nome, s.localita]);
+    await c.query("INSERT INTO sedi (id, nome, localita) VALUES ($1, $2, $3)", [s.id, s.nome, s.localita]);
   }
   for (const p of PRESTAZIONI) {
-    await c.query("INSERT INTO prestazioni (id, nome, tipo, durata_minuti) VALUES ($1, $2, $3, $4)",
-      [p.id, p.nome, p.tipo, p.durata]);
+    await c.query("INSERT INTO prestazioni (id, nome, tipo, durata_minuti) VALUES ($1, $2, $3, $4)", [
+      p.id,
+      p.nome,
+      p.tipo,
+      p.durata,
+    ]);
   }
 
   // b. PAZIENTI: 60, con l'id assegnato dal database.
@@ -126,9 +129,13 @@ async function seed(c: PoolClient): Promise<void> {
   for (let i = 1; i <= NUM_PAZIENTI; i++) {
     const nome = i === 1 ? "Maria" : NOMI[i % 10];
     const cognome = i === 1 ? "Rossi" : COGNOMI[Math.floor(i / 10) % 6];
-    pazienti.push(await inserisci(c,
-      "INSERT INTO pazienti (nome, cognome, telefono, sede_riferimento_id) VALUES ($1, $2, $3, $4)",
-      [nome, cognome, `+39 000 ${String(i).padStart(7, "0")}`, (i % 3) + 1]));
+    pazienti.push(
+      await inserisci(
+        c,
+        "INSERT INTO pazienti (nome, cognome, telefono, sede_riferimento_id) VALUES ($1, $2, $3, $4)",
+        [nome, cognome, `+39 000 ${String(i).padStart(7, "0")}`, (i % 3) + 1],
+      ),
+    );
   }
 
   // c. DATO FISSO (scenari 4, 5, 10): slot 812, cardiologica al Centro tra 10
@@ -137,8 +144,11 @@ async function seed(c: PoolClient): Promise<void> {
   // scenario 3. Resta libero perché non entra nell'array "slot" qui sotto,
   // e il passo f prenota solo gli slot di quell'array.
   // Come gli altri dati fissi, può cadere anche di domenica.
-  await c.query("INSERT INTO slot (id, sede_id, prestazione_id, inizio) VALUES (812, $1, $2, $3)",
-    [CENTRO, CARDIOLOGICA, dataOra(giorno(10), "12:30")]);
+  await c.query("INSERT INTO slot (id, sede_id, prestazione_id, inizio) VALUES (812, $1, $2, $3)", [
+    CENTRO,
+    CARDIOLOGICA,
+    dataOra(giorno(10), "12:30"),
+  ]);
 
   // d. AGENDA: per ogni giorno da domani a tra 14 giorni, per ogni sede, per
   // ogni prestazione di quella sede, per ogni orario, crea uno slot.
@@ -148,13 +158,15 @@ async function seed(c: PoolClient): Promise<void> {
   const slot: Slot[] = [];
   for (let scarto = 1; scarto <= GIORNI_AGENDA; scarto++) {
     const domenica = giorno(scarto).getDay() === 0;
-    if (domenica && scarto > 1) continue;  // continue = salta questo giorno
+    if (domenica && scarto > 1) continue; // continue = salta questo giorno
     for (const s of SEDI) {
       for (const p of s.prestazioni) {
         for (const ora of ORARI) {
-          const id = await inserisci(c,
-            "INSERT INTO slot (sede_id, prestazione_id, inizio) VALUES ($1, $2, $3)",
-            [s.id, p, dataOra(giorno(scarto), ora)]);
+          const id = await inserisci(c, "INSERT INTO slot (sede_id, prestazione_id, inizio) VALUES ($1, $2, $3)", [
+            s.id,
+            p,
+            dataOra(giorno(scarto), ora),
+          ]);
           slot.push({ id, sede: s.id, prestazione: p, scarto });
         }
       }
@@ -170,11 +182,11 @@ async function seed(c: PoolClient): Promise<void> {
   //    Resteranno liberi (scenario 3).
   //  - attesaBreve e attesaLunga: le prime 2 e le ultime 2 cardiologiche di
   //    Valle. Diventeranno classe B con attesa entro e oltre i 10 giorni (scenario 13).
-  const s5531 = slot.find((s) => s.sede === COSTA && s.prestazione === OCULISTICA && s.scarto >= 3)!;  // scenari 2, 11
-  const liberiCentro = slot.filter((s) => s.sede === CENTRO && s.scarto <= 7).slice(-4);  // scenario 3
+  const s5531 = slot.find((s) => s.sede === COSTA && s.prestazione === OCULISTICA && s.scarto >= 3)!; // scenari 2, 11
+  const liberiCentro = slot.filter((s) => s.sede === CENTRO && s.scarto <= 7).slice(-4); // scenario 3
   const cardioValle = slot.filter((s) => s.sede === VALLE && s.prestazione === CARDIOLOGICA);
-  const attesaBreve = cardioValle.slice(0, 2);   // scenario 13: classe B entro i 10 giorni
-  const attesaLunga = cardioValle.slice(-2);     // scenario 13: classe B oltre i 10 giorni
+  const attesaBreve = cardioValle.slice(0, 2); // scenario 13: classe B entro i 10 giorni
+  const attesaLunga = cardioValle.slice(-2); // scenario 13: classe B oltre i 10 giorni
 
   // f. PRENOTAZIONI: per ogni slot dell'agenda decide se resta libero o viene
   // prenotato. "i" è la posizione dello slot nell'array: con il resto della
@@ -187,7 +199,7 @@ async function seed(c: PoolClient): Promise<void> {
 
     // Classe di priorità e anzianità della richiesta, a rotazione.
     let classe = CLASSI[i % 10];
-    let giorniPassati = 2 + (i % 4) * 10;  // richiesta fatta 2, 12, 22 o 32 giorni fa
+    let giorniPassati = 2 + (i % 4) * 10; // richiesta fatta 2, 12, 22 o 32 giorni fa
 
     // Le urgenti (U, entro 72 ore) si prenotano solo nei prossimi 2 giorni,
     // con la richiesta di ieri: come in un'azienda vera, stanno entro soglia.
@@ -198,9 +210,15 @@ async function seed(c: PoolClient): Promise<void> {
     }
 
     // Eccezioni per lo scenario 13; altrimenti, dal giorno 8, uno slot su sei resta libero.
-    if (attesaBreve.includes(s)) { classe = "B"; giorniPassati = 1; }        // attesa ~2 giorni: entro soglia
-    else if (attesaLunga.includes(s)) { classe = "B"; giorniPassati = 20; }  // attesa oltre 30 giorni: fuori soglia
-    else if (s.scarto >= 8 && i % 6 === 0) continue;  // libero
+    if (attesaBreve.includes(s)) {
+      classe = "B";
+      giorniPassati = 1;
+    } // attesa ~2 giorni: entro soglia
+    else if (attesaLunga.includes(s)) {
+      classe = "B";
+      giorniPassati = 20;
+    } // attesa oltre 30 giorni: fuori soglia
+    else if (s.scarto >= 8 && i % 6 === 0) continue; // libero
 
     // Confermate solo metà delle prenotazioni dei prossimi 2 giorni: il recall
     // si fa a ridosso dell'appuntamento. Tutte le altre sono "da confermare".
@@ -208,32 +226,40 @@ async function seed(c: PoolClient): Promise<void> {
 
     // Ogni prenotazione nasce da una richiesta (la ricetta del paziente):
     // prima la richiesta, poi la prenotazione collegata alla richiesta.
-    const richiesta = await inserisci(c,
+    const richiesta = await inserisci(
+      c,
       `INSERT INTO richieste (paziente_id, prestazione_id, classe_priorita, data_richiesta, stato)
        VALUES ($1, $2, $3, $4, 'prenotata')`,
-      [pazienti[i % NUM_PAZIENTI], s.prestazione, classe, data(giorno(-giorniPassati))]);
-    const prenotazione = await inserisci(c,
+      [pazienti[i % NUM_PAZIENTI], s.prestazione, classe, data(giorno(-giorniPassati))],
+    );
+    const prenotazione = await inserisci(
+      c,
       `INSERT INTO prenotazioni (slot_id, richiesta_id, stato, creata_il) VALUES ($1, $2, $3, $4)`,
-      [s.id, richiesta, confermata ? "confermata" : "da_confermare", dataOra(giorno(-giorniPassati), "10:00")]);
+      [s.id, richiesta, confermata ? "confermata" : "da_confermare", dataOra(giorno(-giorniPassati), "10:00")],
+    );
 
     // Una prenotazione confermata ha anche la telefonata che l'ha confermata (ieri alle 16).
     if (confermata) {
-      await c.query(
-        "INSERT INTO contatti (prenotazione_id, esito, registrato_il) VALUES ($1, 'confermato', $2)",
-        [prenotazione, dataOra(giorno(-1), "16:00")]);
+      await c.query("INSERT INTO contatti (prenotazione_id, esito, registrato_il) VALUES ($1, 'confermato', $2)", [
+        prenotazione,
+        dataOra(giorno(-1), "16:00"),
+      ]);
     }
   }
 
   // g. DATO FISSO (scenari 2, 11): prenotazione 5531, oculistica a Costa, da
   // confermare. Richiesta in classe D di 20 giorni fa, paziente numero 5.
-  const richiesta5531 = await inserisci(c,
+  const richiesta5531 = await inserisci(
+    c,
     `INSERT INTO richieste (paziente_id, prestazione_id, classe_priorita, data_richiesta, stato)
      VALUES ($1, $2, 'D', $3, 'prenotata')`,
-    [pazienti[4], OCULISTICA, data(giorno(-20))]);
+    [pazienti[4], OCULISTICA, data(giorno(-20))],
+  );
   await c.query(
     `INSERT INTO prenotazioni (id, slot_id, richiesta_id, stato, creata_il)
      VALUES (5531, $1, $2, 'da_confermare', $3)`,
-    [s5531.id, richiesta5531, dataOra(giorno(-20), "10:00")]);
+    [s5531.id, richiesta5531, dataOra(giorno(-20), "10:00")],
+  );
 
   // h. DATO FISSO (scenari 3, 4, 5, 11): lista d'attesa. Per ogni prestazione,
   // 6 richieste non ancora prenotate, con classi diverse (U, B, D, P, D, P) e
@@ -245,7 +271,8 @@ async function seed(c: PoolClient): Promise<void> {
       await c.query(
         `INSERT INTO richieste (paziente_id, prestazione_id, classe_priorita, data_richiesta, stato)
          VALUES ($1, $2, $3, $4, 'in_attesa')`,
-        [pazienti[k * 10 + p.id], p.id, CLASSI_ATTESA[k], data(giorno(-(5 + k * 15)))]);
+        [pazienti[k * 10 + p.id], p.id, CLASSI_ATTESA[k], data(giorno(-(5 + k * 15)))],
+      );
     }
   }
 
@@ -255,7 +282,8 @@ async function seed(c: PoolClient): Promise<void> {
   await c.query(
     `INSERT INTO richieste (id, paziente_id, prestazione_id, classe_priorita, data_richiesta, stato)
      VALUES (4410, $1, $2, 'P', $3, 'in_attesa')`,
-    [pazienti[0], DERMATOLOGICA, data(giorno(-30))]);
+    [pazienti[0], DERMATOLOGICA, data(giorno(-30))],
+  );
 
   // Gli id fissi (812, 4410, 5531) sono più alti di tutti quelli assegnati in
   // automatico (qualche centinaio), quindi non entrano mai in conflitto.
@@ -282,25 +310,40 @@ async function controlla(c: PoolClient): Promise<void> {
 
   // Dati degli scenari
   console.log("--- dati degli scenari");
-  console.log("prenotazione 5531 da confermare:",
-    await conta("FROM prenotazioni WHERE id = 5531 AND stato = 'da_confermare'"));
+  console.log(
+    "prenotazione 5531 da confermare:",
+    await conta("FROM prenotazioni WHERE id = 5531 AND stato = 'da_confermare'"),
+  );
   console.log("slot 812 libero:", await conta(`FROM slot s WHERE s.id = 812 AND ${libero}`));
-  console.log("cardiologiche in attesa (candidati per 812):",
-    await conta(`FROM richieste WHERE prestazione_id = ${CARDIOLOGICA} AND stato = 'in_attesa'`));
+  console.log(
+    "cardiologiche in attesa (candidati per 812):",
+    await conta(`FROM richieste WHERE prestazione_id = ${CARDIOLOGICA} AND stato = 'in_attesa'`),
+  );
   console.log("richiesta 4410 in attesa:", await conta("FROM richieste WHERE id = 4410 AND stato = 'in_attesa'"));
-  console.log("domani a Costa da confermare:",
-    await conta(`FROM prenotazioni p JOIN slot s ON s.id = p.slot_id
+  console.log(
+    "domani a Costa da confermare:",
+    await conta(
+      `FROM prenotazioni p JOIN slot s ON s.id = p.slot_id
                  WHERE s.sede_id = ${COSTA} AND s.inizio::date = $1 AND p.stato = 'da_confermare'`,
-      [data(giorno(1))]));
-  console.log("slot liberi al Centro nei prossimi 7 giorni:",
-    await conta(`FROM slot s WHERE s.sede_id = ${CENTRO} AND s.inizio >= $1 AND s.inizio < $2 AND ${libero}`,
-      [data(giorno(1)), data(giorno(8))]));
+      [data(giorno(1))],
+    ),
+  );
+  console.log(
+    "slot liberi al Centro nei prossimi 7 giorni:",
+    await conta(`FROM slot s WHERE s.sede_id = ${CENTRO} AND s.inizio >= $1 AND s.inizio < $2 AND ${libero}`, [
+      data(giorno(1)),
+      data(giorno(8)),
+    ]),
+  );
   // Attesa = data dello slot meno data della richiesta, confrontata con la soglia B (10 giorni).
   const cardioB = `FROM prenotazioni p JOIN slot s ON s.id = p.slot_id JOIN richieste r ON r.id = p.richiesta_id
                    WHERE r.prestazione_id = ${CARDIOLOGICA} AND r.classe_priorita = 'B'`;
-  console.log("cardiologiche B entro / oltre 10 giorni d'attesa:",
-    await conta(`${cardioB} AND s.inizio::date - r.data_richiesta <= 10`), "/",
-    await conta(`${cardioB} AND s.inizio::date - r.data_richiesta > 10`));
+  console.log(
+    "cardiologiche B entro / oltre 10 giorni d'attesa:",
+    await conta(`${cardioB} AND s.inizio::date - r.data_richiesta <= 10`),
+    "/",
+    await conta(`${cardioB} AND s.inizio::date - r.data_richiesta > 10`),
+  );
 }
 
 // --- 6. AVVIO: tutto in una transazione --------------------------------------------
