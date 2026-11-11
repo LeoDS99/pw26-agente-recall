@@ -144,4 +144,4 @@ src/mcp-server/
 | `npm run db:reset` | `db:schema` + `db:seed` |
 | `npm run typecheck` | controlla i tipi TypeScript |
 | `npm run format` | formatta il codice con Prettier |
-| `npm run format:check` | controlla la formattazione senza modificare i file |
+| `npm run format:check` | controlla la formattazione senza modificare i file |
