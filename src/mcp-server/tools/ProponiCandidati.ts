@@ -8,21 +8,22 @@ import { RecallTool } from "../RecallTool.js";
 // insieme allo schema: gli spiegano cosa mettere in ogni campo.
 const schemaInput = z.object({
   slotId: z.number().int().positive().describe("Numero dello slot libero"),
-  limite: z.number().int().min(1).max(10).optional()
-    .describe("Quanti candidati restituire (se manca: 5)"),
+  limite: z.number().int().min(1).max(10).optional().describe("Quanti candidati restituire (se manca: 5)"),
 });
 
 // Forma del risultato: la stessa di CandidatiSlot in tipi.ts.
 const schemaOutput = z.object({
   slotId: z.number(),
-  candidati: z.array(z.object({
-    richiestaId: z.number(),
-    paziente: z.string(),
-    telefono: z.string(),
-    classePriorita: z.enum(["U", "B", "D", "P"]),
-    dataRichiesta: z.string(),
-    stessaSede: z.boolean(),
-  })),
+  candidati: z.array(
+    z.object({
+      richiestaId: z.number(),
+      paziente: z.string(),
+      telefono: z.string(),
+      classePriorita: z.enum(["U", "B", "D", "P"]),
+      dataRichiesta: z.string(),
+      stessaSede: z.boolean(),
+    }),
+  ),
 });
 
 export class ProponiCandidati extends RecallTool<typeof schemaInput, typeof schemaOutput> {

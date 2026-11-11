@@ -7,16 +7,37 @@
 import { ErroreDominio } from "./ErroreDominio.js";
 
 // Gli id hanno un nome, così nel codice si legge CENTRO invece di 1.
-export const CENTRO = 1, COSTA = 2, VALLE = 3;
-export const CARDIOLOGICA = 1, OCULISTICA = 2, DERMATOLOGICA = 3, ECOGRAFIA = 4, RISONANZA = 5;
+export const CENTRO = 1,
+  COSTA = 2,
+  VALLE = 3;
+export const CARDIOLOGICA = 1,
+  OCULISTICA = 2,
+  DERMATOLOGICA = 3,
+  ECOGRAFIA = 4,
+  RISONANZA = 5;
 
 // Le 3 sedi e le prestazioni che ognuna offre (tabella delle sedi in 05).
 // "prestazioni" non va nel database: serve al seed per costruire l'agenda,
 // cioè per sapere quali slot creare in ogni sede.
 export const SEDI = [
-  { id: CENTRO, nome: "Collemare Centro", localita: "capoluogo", prestazioni: [CARDIOLOGICA, OCULISTICA, DERMATOLOGICA, ECOGRAFIA, RISONANZA] },
-  { id: COSTA, nome: "Collemare Costa", localita: "paese sul mare", prestazioni: [CARDIOLOGICA, OCULISTICA, DERMATOLOGICA, ECOGRAFIA] },
-  { id: VALLE, nome: "Collemare Valle", localita: "entroterra", prestazioni: [CARDIOLOGICA, OCULISTICA, DERMATOLOGICA] },
+  {
+    id: CENTRO,
+    nome: "Collemare Centro",
+    localita: "capoluogo",
+    prestazioni: [CARDIOLOGICA, OCULISTICA, DERMATOLOGICA, ECOGRAFIA, RISONANZA],
+  },
+  {
+    id: COSTA,
+    nome: "Collemare Costa",
+    localita: "paese sul mare",
+    prestazioni: [CARDIOLOGICA, OCULISTICA, DERMATOLOGICA, ECOGRAFIA],
+  },
+  {
+    id: VALLE,
+    nome: "Collemare Valle",
+    localita: "entroterra",
+    prestazioni: [CARDIOLOGICA, OCULISTICA, DERMATOLOGICA],
+  },
 ];
 
 // Le 5 prestazioni prenotabili. Il tipo (visita o esame) serve per la soglia

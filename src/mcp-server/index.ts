@@ -12,8 +12,4 @@ import { SlotLiberi } from "./tools/SlotLiberi.js";
 const repo = new RecallRepository(pool);
 
 // I tool esposti dal server: per aggiungerne uno basta una riga qui.
-new RecallMcpServer([
-  new AppuntamentiDaConfermare(repo),
-  new ProponiCandidati(repo),
-  new SlotLiberi(repo),
-]).avvia();
+new RecallMcpServer([new AppuntamentiDaConfermare(repo), new ProponiCandidati(repo), new SlotLiberi(repo)]).avvia();

@@ -50,7 +50,8 @@ export class RecallMcpServer {
             isError: true,
           };
         }
-      });
+      },
+    );
   }
 
   // Avvia il server su stdio.

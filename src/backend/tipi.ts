@@ -9,11 +9,11 @@ export type TipoPrestazione = "visita" | "esame";
 // Una riga del risultato di appuntamentiDaConfermare.
 export interface AppuntamentoDaConfermare {
   prenotazioneId: number;
-  paziente: string;      // nome e cognome
+  paziente: string; // nome e cognome
   telefono: string;
   prestazione: string;
   sede: string;
-  inizio: string;        // "2026-11-06 11:00", testo già leggibile
+  inizio: string; // "2026-11-06 11:00", testo già leggibile
 }
 
 // Una riga del risultato di slotLiberi.
@@ -21,7 +21,7 @@ export interface SlotLibero {
   slotId: number;
   prestazione: string;
   sede: string;
-  inizio: string;        // "2026-11-12 09:00"
+  inizio: string; // "2026-11-12 09:00"
 }
 
 // Un paziente in lista d'attesa che si può chiamare per uno slot.
@@ -29,9 +29,9 @@ export interface Candidato {
   richiestaId: number;
   paziente: string;
   telefono: string;
-  classePriorita: ClassePriorita;  // U, B, D o P
-  dataRichiesta: string;   // "2026-10-16"
-  stessaSede: boolean;     // la sede di riferimento del paziente è quella dello slot
+  classePriorita: ClassePriorita; // U, B, D o P
+  dataRichiesta: string; // "2026-10-16"
+  stessaSede: boolean; // la sede di riferimento del paziente è quella dello slot
 }
 
 // Risultato di candidatiPerSlot: lo slot e i candidati in ordine.
@@ -57,8 +57,8 @@ export type EsitoContatto = "confermato" | "disdetto" | "non_raggiungibile";
 export interface EsitoRegistrato {
   prenotazioneId: number;
   esito: EsitoContatto;
-  statoPrenotazione: string;  // stato della prenotazione dopo la registrazione
-  slotLiberato: boolean;      // true se lo slot è tornato libero (disdetta)
+  statoPrenotazione: string; // stato della prenotazione dopo la registrazione
+  slotLiberato: boolean; // true se lo slot è tornato libero (disdetta)
   slotId: number;
 }
 

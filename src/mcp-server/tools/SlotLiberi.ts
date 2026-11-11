@@ -14,7 +14,9 @@ const GIORNI_PREDEFINITI = 30;
 // z.enum(...) accetta solo i nomi presenti nel catalogo.
 const schemaInput = z.object({
   dal: z.iso.date().describe("Primo giorno da cercare, formato AAAA-MM-GG"),
-  al: z.iso.date().optional()
+  al: z.iso
+    .date()
+    .optional()
     .describe(`Ultimo giorno compreso, formato AAAA-MM-GG (se manca: ${GIORNI_PREDEFINITI} giorni dopo "dal")`),
   prestazione: z.enum(NOMI_PRESTAZIONI).optional().describe("Solo questa prestazione (se manca: tutte)"),
   sede: z.enum(NOMI_SEDI).optional().describe("Solo questa sede (se manca: tutte)"),
@@ -22,12 +24,14 @@ const schemaInput = z.object({
 
 // Il risultato MCP deve essere un oggetto: l'elenco sta nel campo "slot".
 const schemaOutput = z.object({
-  slot: z.array(z.object({
-    slotId: z.number(),
-    prestazione: z.string(),
-    sede: z.string(),
-    inizio: z.string(),
-  })),
+  slot: z.array(
+    z.object({
+      slotId: z.number(),
+      prestazione: z.string(),
+      sede: z.string(),
+      inizio: z.string(),
+    }),
+  ),
 });
 
 export class SlotLiberi extends RecallTool<typeof schemaInput, typeof schemaOutput> {
@@ -56,7 +60,7 @@ export class SlotLiberi extends RecallTool<typeof schemaInput, typeof schemaOutp
 
 // "2026-11-12" più 30 giorni = "2026-12-12"
 function giorniDopo(data: string, giorni: number): string {
-  const d = new Date(data);              // una data senza orario è letta come UTC
+  const d = new Date(data); // una data senza orario è letta come UTC
   d.setUTCDate(d.getUTCDate() + giorni);
-  return d.toISOString().slice(0, 10);   // di nuovo AAAA-MM-GG
+  return d.toISOString().slice(0, 10); // di nuovo AAAA-MM-GG
 }
