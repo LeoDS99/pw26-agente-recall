@@ -3,7 +3,7 @@
 // giorni dalla richiesta la prestazione va erogata. Fonti complete nell'elaborato.
 // Le soglie stanno nel codice e non nel database: sono regole fisse.
 
-import type { ClassePriorita, TipoPrestazione } from "./tipi.js";
+import type { ClassePriorita, TipoPrestazione } from "./tipi.ts";
 
 export class SoglieAttesa {
   // Tabella delle soglie in giorni. Solo la classe D cambia tra visite

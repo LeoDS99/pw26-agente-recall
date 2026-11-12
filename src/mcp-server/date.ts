@@ -1,6 +1,6 @@
 // Calcoli sulle date usati dai tool che lavorano su un intervallo "dal" - "al".
 
-import { ErroreDominio } from "../backend/ErroreDominio.js";
+import { ErroreDominio } from "../backend/ErroreDominio.ts";
 
 // Se manca la data finale, l'intervallo copre i 30 giorni dopo "dal".
 export const GIORNI_PREDEFINITI = 30;

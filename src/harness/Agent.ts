@@ -3,9 +3,9 @@
 // modello, esegue i tool che il modello chiede, gli restituisce i risultati e
 // ripete, finché il modello risponde senza chiedere altri tool.
 
-import type { McpToolClient } from "./McpToolClient.js";
-import type { ModelProvider } from "./ModelProvider.js";
-import type { ChiamataTool, EsitoAgente, Messaggio, SpecTool, UsoToken } from "./tipi.js";
+import type { McpToolClient } from "./McpToolClient.ts";
+import type { ModelProvider } from "./ModelProvider.ts";
+import type { ChiamataTool, ConfermaUtente, EsitoAgente, Messaggio, SpecTool, UsoToken } from "./tipi.ts";
 
 export class Agent {
   private readonly modello: ModelProvider; // il modello, dietro l'astrazione dal fornitore

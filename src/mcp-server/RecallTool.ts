@@ -7,7 +7,7 @@
 // I tool sono adattatori: non contengono SQL né regole di dominio.
 
 import type * as z from "zod/v4";
-import type { RecallRepository } from "../backend/RecallRepository.js";
+import type { RecallRepository } from "../backend/RecallRepository.ts";
 
 // TIn e TOut sono i tipi dei due schemi: così TypeScript controlla che
 // esegui() riceva e restituisca dati con la forma dichiarata negli schemi.

@@ -7,7 +7,7 @@
 
 import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
-import type { EventoLog } from "./tipi.js";
+import type { EventoLog } from "./tipi.ts";
 
 export class JsonlLogger {
   private readonly percorsoFile: string;

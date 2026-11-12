@@ -5,7 +5,7 @@
 
 import { Client } from "@modelcontextprotocol/client";
 import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
-import type { EsitoTool, SpecTool } from "./tipi.js";
+import type { EsitoTool, SpecTool } from "./tipi.ts";
 
 // Come avviare il server: l'eseguibile e i suoi argomenti.
 export interface ComandoServer {

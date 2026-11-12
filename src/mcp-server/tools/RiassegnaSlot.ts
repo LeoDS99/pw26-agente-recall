@@ -5,7 +5,7 @@
 // non è in attesa per quella prestazione, il tool risponde con il motivo.
 
 import * as z from "zod/v4";
-import { RecallTool } from "../RecallTool.js";
+import { RecallTool } from "../RecallTool.ts";
 
 const schemaInput = z.object({
   slotId: z.number().int().positive().describe("Numero dello slot libero da assegnare"),

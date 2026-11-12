@@ -3,9 +3,9 @@
 // Caso d'uso UC5 (responsabile delle liste d'attesa).
 
 import * as z from "zod/v4";
-import { NOMI_PRESTAZIONI, idPrestazione } from "../../backend/catalogo.js";
-import { GIORNI_PREDEFINITI, dataFinale } from "../date.js";
-import { RecallTool } from "../RecallTool.js";
+import { NOMI_PRESTAZIONI, idPrestazione } from "../../backend/catalogo.ts";
+import { GIORNI_PREDEFINITI, dataFinale } from "../date.ts";
+import { RecallTool } from "../RecallTool.ts";
 
 const schemaInput = z.object({
   dal: z.iso.date().describe("Primo giorno di appuntamenti da considerare, formato AAAA-MM-GG"),

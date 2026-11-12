@@ -3,7 +3,7 @@
 // soloLettura è false: l'harness chiede conferma all'operatore prima di eseguirlo.
 
 import * as z from "zod/v4";
-import { RecallTool } from "../RecallTool.js";
+import { RecallTool } from "../RecallTool.ts";
 
 const schemaInput = z.object({
   prenotazioneId: z.number().int().positive().describe("Numero della prenotazione (appuntamento)"),

@@ -2,7 +2,7 @@
 // lista d'attesa da chiamare, già in ordine. Casi d'uso UC3 e UC4.
 
 import * as z from "zod/v4";
-import { RecallTool } from "../RecallTool.js";
+import { RecallTool } from "../RecallTool.ts";
 
 // Parametri di ingresso. Le descrizioni (describe) arrivano al modello
 // insieme allo schema: gli spiegano cosa mettere in ogni campo.

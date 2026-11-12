@@ -3,7 +3,7 @@
 // un altro modello o un altro fornitore basta scrivere un'altra classe che la
 // implementa, senza toccare il resto del codice (requisito dell'allegato).
 
-import type { Messaggio, RispostaModello, SpecTool } from "./tipi.js";
+import type { Messaggio, RispostaModello, SpecTool } from "./tipi.ts";
 
 export interface ModelProvider {
   // Nome del modello, per esempio "ollama/qwen3:4b-instruct": finisce nel log.

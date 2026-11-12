@@ -4,7 +4,7 @@
 // tradurli in id. Limite del prototipo: in un sistema reale si leggerebbero
 // dal database.
 
-import { ErroreDominio } from "./ErroreDominio.js";
+import { ErroreDominio } from "./ErroreDominio.ts";
 
 // Gli id hanno un nome, così nel codice si legge CENTRO invece di 1.
 export const CENTRO = 1,

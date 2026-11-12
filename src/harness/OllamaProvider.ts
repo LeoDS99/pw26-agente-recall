@@ -3,8 +3,8 @@
 // singola chiamata al modello: il ciclo agentico non è qui, è in Agent.
 
 import { Ollama, type Message, type Tool } from "ollama";
-import type { ModelProvider } from "./ModelProvider.js";
-import type { Messaggio, RispostaModello, SpecTool } from "./tipi.js";
+import type { ModelProvider } from "./ModelProvider.ts";
+import type { Messaggio, RispostaModello, SpecTool } from "./tipi.ts";
 
 export interface OpzioniOllama {
   host: string; // indirizzo del server di Ollama
