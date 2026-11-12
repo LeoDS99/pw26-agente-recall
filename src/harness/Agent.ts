@@ -38,8 +38,26 @@ export class Agent {
   async esegui(richiesta: string): Promise<EsitoAgente> {
     this.log.registra({ tipo: "inizio", richiesta, modello: this.modello.nome });
 
+    // Somma dei token di tutti i giri: serve per la stima dei costi.
+    const tokenTotali: UsoToken = { ingresso: 0, uscita: 0 };
+
     // I tool disponibili si chiedono al server: il modello può usare solo questi.
-    const tools = await this.mcp.elencaTool();
+    // Se il server non risponde, il modello non viene interrogato: senza i dati
+    // potrebbe solo inventare.
+    let tools: SpecTool[];
+    try {
+      tools = await this.mcp.elencaTool();
+    } catch (errore) {
+      this.log.registra({ tipo: "errore", messaggio: testoErrore(errore) });
+      return this.concludi({
+        risposta:
+          "Il sistema delle prenotazioni non è raggiungibile in questo momento: " +
+          "non posso leggere né modificare i dati. Riprova più tardi.",
+        motivo: "server_non_disponibile",
+        iterazioni: 0,
+        token: tokenTotali,
+      });
+    }
 
     // La conversazione parte con due messaggi: le istruzioni (sistema) e la
     // richiesta dell'operatore (utente). Il modello non ha memoria: a ogni giro
@@ -49,9 +67,6 @@ export class Agent {
       { ruolo: "sistema", testo: this.promptDiSistema },
       { ruolo: "utente", testo: richiesta },
     ];
-
-    // Somma dei token di tutti i giri: serve per la stima dei costi.
-    const tokenTotali: UsoToken = { ingresso: 0, uscita: 0 };
 
     // Il ciclo agentico: ogni giro è una chiamata al modello. Il limite di giri
     // ferma un modello che continua a chiedere tool senza arrivare a una risposta.
@@ -148,10 +163,15 @@ export class Agent {
     this.log.registra({
       tipo: "risultato_tool",
       tool: chiamata.nome,
-
       ...esito,
       durataMs: Date.now() - inizio,
     });
     return esito.testo;
   }
+}
+
+// Il testo di un errore qualunque: quello che arriva in un catch può essere
+// di qualsiasi tipo, non per forza un Error.
+function testoErrore(errore: unknown): string {
+  return errore instanceof Error ? errore.message : String(errore);
 }

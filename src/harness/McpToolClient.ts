@@ -16,6 +16,7 @@ export interface ComandoServer {
 export class McpToolClient {
   private readonly client: Client;
   private readonly server: ComandoServer;
+  private collegato = false; // true solo tra un collegamento riuscito e la chiusura
 
   constructor(server: ComandoServer) {
     this.server = server;
@@ -26,11 +27,25 @@ export class McpToolClient {
   // parte, lancia un errore: chi chiama decide cosa fare (scenario 12).
   async connetti(): Promise<void> {
     const trasporto = new StdioClientTransport({ command: this.server.comando, args: this.server.argomenti });
+    // Se il server si ferma o la connessione cade, l'SDK ci avvisa qui.
+    this.client.onclose = () => {
+      this.collegato = false;
+    };
     await this.client.connect(trasporto);
+    this.collegato = true;
+  }
+
+  // Senza collegamento l'SDK non dà errore: restituisce un elenco di tool
+  // vuoto. Per l'harness invece è un errore, e va detto in modo esplicito.
+  private verificaCollegamento(): void {
+    if (!this.collegato) {
+      throw new Error("Server MCP non collegato.");
+    }
   }
 
   // L'elenco dei tool esposti dal server, nel formato dell'harness.
   async elencaTool(): Promise<SpecTool[]> {
+    this.verificaCollegamento();
     const { tools } = await this.client.listTools();
     return tools.map((t) => ({
       nome: t.name,
@@ -48,6 +63,7 @@ export class McpToolClient {
   // va comunque al modello. Lancia solo se il tool non esiste (per questo Agent
   // controlla prima l'elenco) o se il collegamento con il server si interrompe.
   async chiamaTool(nome: string, argomenti: Record<string, unknown>): Promise<EsitoTool> {
+    this.verificaCollegamento();
     const risultato = await this.client.callTool({ name: nome, arguments: argomenti });
     const testo = risultato.content.flatMap((blocco) => (blocco.type === "text" ? [blocco.text] : [])).join("\n");
     return { testo, errore: risultato.isError === true };
