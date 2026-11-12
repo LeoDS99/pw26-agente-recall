@@ -74,3 +74,11 @@ export type EventoLog =
   | { tipo: "risultato_tool"; tool: string; testo: string; errore: boolean; durataMs: number }
   | { tipo: "errore"; messaggio: string }
   | { tipo: "fine"; motivo: MotivoArresto; iterazioni: number; token: UsoToken; risposta: string };
+
+// Il risultato di una richiesta all'agente.
+export interface EsitoAgente {
+  risposta: string; // il testo per l'operatore
+  motivo: MotivoArresto; // perché il ciclo si è fermato
+  iterazioni: number; // quanti giri ha fatto
+  token: UsoToken; // token consumati in totale
+}
