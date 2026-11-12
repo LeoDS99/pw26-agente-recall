@@ -57,7 +57,9 @@ export class Agent {
     // ferma un modello che continua a chiedere tool senza arrivare a una risposta.
     for (let iterazione = 1; iterazione <= this.maxIterazioni; iterazione++) {
       // Il modello riceve tutta la conversazione e l'elenco dei tool.
+      this.log.registra({ tipo: "richiesta_modello", iterazione, messaggi: messaggi.length });
       const risposta = await this.modello.chat(messaggi, tools);
+      this.log.registra({ tipo: "risposta_modello", iterazione, ...risposta });
 
       const { ingresso, uscita } = risposta.token;
       tokenTotali.ingresso += ingresso;
@@ -120,6 +122,7 @@ export class Agent {
     // Tool inesistente: non si chiama niente. Il modello riceve l'avviso con i
     // nomi dei tool disponibili.
     if (!tool) {
+      this.log.registra({ tipo: "tool_non_disponibile", tool: chiamata.nome });
       return `Tool ${chiamata.nome} non trovato, i tool disponibili sono: ${tools.map((t) => t.nome).join(", ")}`;
     }
 
@@ -128,6 +131,7 @@ export class Agent {
     // niente e il modello riceve il rifiuto.
     if (!tool.soloLettura) {
       const approvata = await this.conferma.conferma(chiamata);
+      this.log.registra({ tipo: "conferma", tool: chiamata.nome, argomenti: chiamata.argomenti, concessa: approvata });
       if (!approvata) {
         return (
           `Chiamata al tool ${chiamata.nome} rifiutata dall'operatore: l'operazione non è stata eseguita. ` +
@@ -138,7 +142,16 @@ export class Agent {
 
     // Tool valido: si esegue sul server e al modello torna il testo dell'esito
     // (i dati in JSON, oppure il messaggio d'errore del tool).
+    this.log.registra({ tipo: "chiamata_tool", tool: chiamata.nome, argomenti: chiamata.argomenti });
+    const inizio = Date.now();
     const esito = await this.mcp.chiamaTool(chiamata.nome, chiamata.argomenti);
+    this.log.registra({
+      tipo: "risultato_tool",
+      tool: chiamata.nome,
+
+      ...esito,
+      durataMs: Date.now() - inizio,
+    });
     return esito.testo;
   }
 }
