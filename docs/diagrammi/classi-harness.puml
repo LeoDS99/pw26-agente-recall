@@ -43,6 +43,7 @@ class McpToolClient {
 
 class JsonlLogger {
   - percorsoFile : string
+  + {static} percorsoPredefinito(cartella) : string
   + registra(evento : EventoLog) : void
 }
 

@@ -46,3 +46,31 @@ export interface RispostaModello {
   token: UsoToken;
   durataMs: number; // tempo della chiamata al modello, in millisecondi
 }
+
+// Perché il ciclo dell'agente si è fermato (05, "Regole di comportamento").
+export type MotivoArresto =
+  | "risposta_finale" // il modello ha risposto senza chiedere tool
+  | "max_iterazioni" // raggiunto il numero massimo di giri
+  | "server_non_disponibile" // il server MCP non è raggiungibile: il modello non viene interrogato
+  | "errore"; // errore grave (per esempio il modello non risponde)
+
+// Un evento del log: una riga del file JSON Lines. Copre quello che l'allegato
+// chiede di registrare: richieste al modello, tool invocati, parametri,
+// risultati, token consumati.
+export type EventoLog =
+  | { tipo: "inizio"; richiesta: string; modello: string }
+  | { tipo: "richiesta_modello"; iterazione: number; messaggi: number }
+  | {
+      tipo: "risposta_modello";
+      iterazione: number;
+      testo: string;
+      chiamate: ChiamataTool[];
+      token: UsoToken;
+      durataMs: number;
+    }
+  | { tipo: "tool_non_disponibile"; tool: string }
+  | { tipo: "conferma"; tool: string; argomenti: Record<string, unknown>; concessa: boolean }
+  | { tipo: "chiamata_tool"; tool: string; argomenti: Record<string, unknown> }
+  | { tipo: "risultato_tool"; tool: string; testo: string; errore: boolean; durataMs: number }
+  | { tipo: "errore"; messaggio: string }
+  | { tipo: "fine"; motivo: MotivoArresto; iterazioni: number; token: UsoToken; risposta: string };
