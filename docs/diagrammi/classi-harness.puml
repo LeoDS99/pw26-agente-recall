@@ -31,9 +31,11 @@ interface ConfermaUtente {
 
 class McpToolClient {
   - client : Client
+  - server : ComandoServer
   + connetti() : Promise<void>
   + elencaTool() : Promise<SpecTool[]>
-  + chiamaTool(nome, args) : Promise<string>
+  + chiamaTool(nome, args) : Promise<EsitoTool>
+  + chiudi() : Promise<void>
 }
 
 class JsonlLogger {
