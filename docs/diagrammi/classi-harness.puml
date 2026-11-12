@@ -18,11 +18,14 @@ class Agent {
 }
 
 interface ModelProvider {
+  + nome : string
   + chat(messaggi, tools) : Promise<RispostaModello>
 }
 
 class OllamaProvider {
+  - client : Ollama
   - modello : string
+  - contesto : number
 }
 
 interface ConfermaUtente {
