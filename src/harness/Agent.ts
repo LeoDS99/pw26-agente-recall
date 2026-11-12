@@ -4,6 +4,7 @@
 // ripete, finché il modello risponde senza chiedere altri tool.
 
 import type { ConfermaUtente } from "./ConfermaUtente.ts";
+import type { JsonlLogger } from "./JsonlLogger.ts";
 import type { McpToolClient } from "./McpToolClient.ts";
 import type { ModelProvider } from "./ModelProvider.ts";
 import type { ChiamataTool, EsitoAgente, Messaggio, SpecTool, UsoToken } from "./tipi.ts";
@@ -12,6 +13,7 @@ export class Agent {
   private readonly modello: ModelProvider; // il modello, dietro l'astrazione dal fornitore
   private readonly mcp: McpToolClient; // il collegamento al server MCP
   private readonly conferma: ConfermaUtente; // chi chiede la conferma all'operatore
+  private readonly log: JsonlLogger; // il log strutturato di ogni passo
   private readonly promptDiSistema: string; // le istruzioni fisse per il modello
   private readonly maxIterazioni: number; // numero massimo di giri del ciclo
 
@@ -19,12 +21,14 @@ export class Agent {
     modello: ModelProvider,
     mcp: McpToolClient,
     conferma: ConfermaUtente,
+    log: JsonlLogger,
     promptDiSistema: string,
     maxIterazioni = 12,
   ) {
     this.modello = modello;
     this.mcp = mcp;
     this.conferma = conferma;
+    this.log = log;
     this.promptDiSistema = promptDiSistema;
     this.maxIterazioni = maxIterazioni;
   }
@@ -32,6 +36,8 @@ export class Agent {
   // Esegue una richiesta dell'operatore e restituisce l'esito: la risposta,
   // il motivo per cui il ciclo si è fermato, i giri fatti e i token consumati.
   async esegui(richiesta: string): Promise<EsitoAgente> {
+    this.log.registra({ tipo: "inizio", richiesta, modello: this.modello.nome });
+
     // I tool disponibili si chiedono al server: il modello può usare solo questi.
     const tools = await this.mcp.elencaTool();
 
@@ -60,12 +66,12 @@ export class Agent {
       // Condizione di arresto: se il modello non chiede tool, il suo testo è la
       // risposta finale per l'operatore.
       if (risposta.chiamate.length === 0) {
-        return {
+        return this.concludi({
           risposta: risposta.testo,
           motivo: "risposta_finale",
           iterazioni: iterazione,
           token: tokenTotali,
-        };
+        });
       }
 
       // Altrimenti il modello ha chiesto uno o più tool. La sua risposta entra
@@ -84,7 +90,7 @@ export class Agent {
 
     // Limite di giri raggiunto senza una risposta finale. Il messaggio dice che
     // cosa è successo e avvisa che qualche scrittura potrebbe essere già avvenuta.
-    return {
+    return this.concludi({
       risposta:
         "Non sono riuscito a completare la richiesta entro il numero massimo di passaggi. " +
         "Alcune operazioni potrebbero essere già state eseguite: controlla prima di riprovare, " +
@@ -92,7 +98,14 @@ export class Agent {
       motivo: "max_iterazioni",
       iterazioni: this.maxIterazioni,
       token: tokenTotali,
-    };
+    });
+  }
+
+  // Ogni uscita dal ciclo passa da qui: registra la fine nel log, con il
+  // motivo dell'arresto, e restituisce l'esito.
+  private concludi(esito: EsitoAgente): EsitoAgente {
+    this.log.registra({ tipo: "fine", ...esito });
+    return esito;
   }
 
   // Esegue una chiamata chiesta dal modello e restituisce il testo da ridare al
