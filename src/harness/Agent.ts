@@ -5,13 +5,13 @@
 
 import type { McpToolClient } from "./McpToolClient.js";
 import type { ModelProvider } from "./ModelProvider.js";
-import type { EsitoAgente, Messaggio, UsoToken } from "./tipi.js";
+import type { ChiamataTool, EsitoAgente, Messaggio, SpecTool, UsoToken } from "./tipi.js";
 
 export class Agent {
-  private readonly modello: ModelProvider;
-  private readonly mcp: McpToolClient;
-  private readonly promptDiSistema: string;
-  private readonly maxIterazioni: number;
+  private readonly modello: ModelProvider; // il modello, dietro l'astrazione dal fornitore
+  private readonly mcp: McpToolClient; // il collegamento al server MCP
+  private readonly promptDiSistema: string; // le istruzioni fisse per il modello
+  private readonly maxIterazioni: number; // numero massimo di giri del ciclo
 
   constructor(modello: ModelProvider, mcp: McpToolClient, promptDiSistema: string, maxIterazioni = 12) {
     this.modello = modello;
@@ -20,30 +20,36 @@ export class Agent {
     this.maxIterazioni = maxIterazioni;
   }
 
-  // Esegue una richiesta dell'operatore e restituisce l'esito.
+  // Esegue una richiesta dell'operatore e restituisce l'esito: la risposta,
+  // il motivo per cui il ciclo si è fermato, i giri fatti e i token consumati.
   async esegui(richiesta: string): Promise<EsitoAgente> {
-    // 1. Chiedi al server l'elenco dei tool (this.mcp.elencaTool).
-
+    // I tool disponibili si chiedono al server: il modello può usare solo questi.
     const tools = await this.mcp.elencaTool();
 
-    // 2. Prepara la lista dei messaggi: sistema e utente.
+    // La conversazione parte con due messaggi: le istruzioni (sistema) e la
+    // richiesta dell'operatore (utente). Il modello non ha memoria: a ogni giro
+    // riceve tutta la lista, che cresce con le sue risposte e con i risultati
+    // dei tool.
     const messaggi: Messaggio[] = [
       { ruolo: "sistema", testo: this.promptDiSistema },
       { ruolo: "utente", testo: richiesta },
     ];
 
-    // 3. Prepara il contatore dei token, a zero (tipo UsoToken).
+    // Somma dei token di tutti i giri: serve per la stima dei costi.
     const tokenTotali: UsoToken = { ingresso: 0, uscita: 0 };
-    // 4. Ripeti al massimo maxIterazioni volte:
+
+    // Il ciclo agentico: ogni giro è una chiamata al modello. Il limite di giri
+    // ferma un modello che continua a chiedere tool senza arrivare a una risposta.
     for (let iterazione = 1; iterazione <= this.maxIterazioni; iterazione++) {
-      //    4a. chiedi al modello (this.modello.chat), passando messaggi e tool;
+      // Il modello riceve tutta la conversazione e l'elenco dei tool.
       const risposta = await this.modello.chat(messaggi, tools);
 
-      //    4b. somma i token della risposta al contatore;
       const { ingresso, uscita } = risposta.token;
       tokenTotali.ingresso += ingresso;
       tokenTotali.uscita += uscita;
-      //    4c. se il modello non chiede tool: restituisci l'esito, motivo "risposta_finale";
+
+      // Condizione di arresto: se il modello non chiede tool, il suo testo è la
+      // risposta finale per l'operatore.
       if (risposta.chiamate.length === 0) {
         return {
           risposta: risposta.testo,
@@ -52,30 +58,52 @@ export class Agent {
           token: tokenTotali,
         };
       }
-      //    4d. aggiungi ai messaggi la risposta del modello (ruolo "modello");
-      messaggi.push({ ruolo: "modello", testo: risposta.testo, chiamate: risposta.chiamate });
-      //    4e. per ogni chiamata: esegui il tool (this.mcp.chiamaTool) e aggiungi
 
-      //        ai messaggi il suo risultato (ruolo "tool").
+      // Altrimenti il modello ha chiesto uno o più tool. La sua risposta entra
+      // nella conversazione, così al prossimo giro sa che cosa aveva chiesto.
+      messaggi.push({ ruolo: "modello", testo: risposta.testo, chiamate: risposta.chiamate });
+
+      // Le chiamate si eseguono una alla volta, nell'ordine deciso dal modello.
+      // Il testo di ognuna (risultato o errore) entra nella conversazione come
+      // messaggio "tool": il modello lo legge al prossimo giro.
       for (const chiamata of risposta.chiamate) {
-        const { nome, argomenti } = chiamata;
-        const esitoTool = await this.mcp.chiamaTool(nome, argomenti);
-        messaggi.push({ ruolo: "tool", nomeTool: nome, testo: esitoTool.testo });
+        const { nome } = chiamata;
+        const esitoTool = await this.eseguiChiamata(chiamata, tools);
+        messaggi.push({ ruolo: "tool", nomeTool: nome, testo: esitoTool });
       }
     }
-    //    4e. per ogni chiamata: esegui il tool (this.mcp.chiamaTool) e aggiungi
 
-    //        ai messaggi il suo risultato (ruolo "tool").
-
-    // 5. Se il ciclo finisce senza risposta finale: restituisci l'esito con
-
-    //    motivo "max_iterazioni" e il messaggio onesto per l'operatore.
-
+    // Limite di giri raggiunto senza una risposta finale. Il messaggio dice che
+    // cosa è successo e avvisa che qualche scrittura potrebbe essere già avvenuta.
     return {
-      risposta: "Il modello non ha fornito una risposta finale dopo il numero massimo di iterazioni.",
+      risposta:
+        "Non sono riuscito a completare la richiesta entro il numero massimo di passaggi. " +
+        "Alcune operazioni potrebbero essere già state eseguite: controlla prima di riprovare, " +
+        "poi riformula la richiesta in modo più preciso.",
       motivo: "max_iterazioni",
       iterazioni: this.maxIterazioni,
       token: tokenTotali,
     };
+  }
+
+  // Esegue una chiamata chiesta dal modello e restituisce il testo da ridare al
+  // modello: il risultato del tool, oppure il motivo per cui non è stato
+  // eseguito. Gli errori che il modello può correggere da solo non diventano
+  // eccezioni: tornano come testo, così il modello li legge e riprova.
+  private async eseguiChiamata(chiamata: ChiamataTool, tools: SpecTool[]): Promise<string> {
+    // Il tool chiesto deve essere tra quelli esposti dal server: un modello può
+    // inventarsi un nome.
+    const tool: SpecTool | undefined = tools.find((t) => t.nome === chiamata.nome);
+
+    // Tool inesistente: non si chiama niente. Il modello riceve l'avviso con i
+    // nomi dei tool disponibili.
+    if (!tool) {
+      return `Tool ${chiamata.nome} non trovato, i tool disponibili sono: ${tools.map((t) => t.nome).join(", ")}`;
+    }
+
+    // Tool valido: si esegue sul server e al modello torna il testo dell'esito
+    // (i dati in JSON, oppure il messaggio d'errore del tool).
+    const esito = await this.mcp.chiamaTool(chiamata.nome, chiamata.argomenti);
+    return esito.testo;
   }
 }
