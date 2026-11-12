@@ -3,19 +3,28 @@
 // modello, esegue i tool che il modello chiede, gli restituisce i risultati e
 // ripete, finché il modello risponde senza chiedere altri tool.
 
+import type { ConfermaUtente } from "./ConfermaUtente.ts";
 import type { McpToolClient } from "./McpToolClient.ts";
 import type { ModelProvider } from "./ModelProvider.ts";
-import type { ChiamataTool, ConfermaUtente, EsitoAgente, Messaggio, SpecTool, UsoToken } from "./tipi.ts";
+import type { ChiamataTool, EsitoAgente, Messaggio, SpecTool, UsoToken } from "./tipi.ts";
 
 export class Agent {
   private readonly modello: ModelProvider; // il modello, dietro l'astrazione dal fornitore
   private readonly mcp: McpToolClient; // il collegamento al server MCP
+  private readonly conferma: ConfermaUtente; // chi chiede la conferma all'operatore
   private readonly promptDiSistema: string; // le istruzioni fisse per il modello
   private readonly maxIterazioni: number; // numero massimo di giri del ciclo
 
-  constructor(modello: ModelProvider, mcp: McpToolClient, promptDiSistema: string, maxIterazioni = 12) {
+  constructor(
+    modello: ModelProvider,
+    mcp: McpToolClient,
+    conferma: ConfermaUtente,
+    promptDiSistema: string,
+    maxIterazioni = 12,
+  ) {
     this.modello = modello;
     this.mcp = mcp;
+    this.conferma = conferma;
     this.promptDiSistema = promptDiSistema;
     this.maxIterazioni = maxIterazioni;
   }
@@ -99,6 +108,19 @@ export class Agent {
     // nomi dei tool disponibili.
     if (!tool) {
       return `Tool ${chiamata.nome} non trovato, i tool disponibili sono: ${tools.map((t) => t.nome).join(", ")}`;
+    }
+
+    // Tool che modifica i dati (non dichiarato di sola lettura): prima di
+    // eseguirlo serve la conferma dell'operatore. Se la nega, non si chiama
+    // niente e il modello riceve il rifiuto.
+    if (!tool.soloLettura) {
+      const approvata = await this.conferma.conferma(chiamata);
+      if (!approvata) {
+        return (
+          `Chiamata al tool ${chiamata.nome} rifiutata dall'operatore: l'operazione non è stata eseguita. ` +
+          "Non riprovare: comunica all'operatore che non è stata fatta."
+        );
+      }
     }
 
     // Tool valido: si esegue sul server e al modello torna il testo dell'esito
