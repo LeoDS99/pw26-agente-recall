@@ -54,7 +54,7 @@ function dataOra(d: Date, ora: string): string {
 
 // Nomi e cognomi inventati, combinati tra loro per creare i pazienti.
 const NOMI = ["Marco", "Giulia", "Luca", "Francesca", "Andrea", "Chiara", "Matteo", "Sara", "Paolo", "Elena"];
-const COGNOMI = ["Bianchi", "Romano", "Colombo", "Ricci", "Marino", "Greco"];
+const COGNOMI = ["Bianchi", "Romano", "Colombo", "Ricci", "Marino", "Greco", "Gallo"];
 
 // Classi di priorità della prescrizione SSN (Piano nazionale di governo
 // delle liste d'attesa, PNGLA): la lettera sulla ricetta dice entro quando
@@ -66,7 +66,7 @@ const COGNOMI = ["Bianchi", "Romano", "Colombo", "Ricci", "Marino", "Greco"];
 // Qui sono assegnate a rotazione: ogni 10 prenotazioni, 1 U, 2 B, 3 D, 4 P.
 const CLASSI = ["P", "D", "B", "P", "D", "P", "B", "D", "P", "U"];
 
-const NUM_PAZIENTI = 60; // 10 nomi x 6 cognomi
+const NUM_PAZIENTI = 60; // 10 nomi e 7 cognomi: combinazioni tutte diverse fino a 70
 const GIORNI_AGENDA = 14; // l'agenda va da domani a tra 14 giorni
 const ORARI = ["09:00", "11:00"]; // due slot al giorno per ogni prestazione in ogni sede
 
@@ -121,14 +121,16 @@ async function seed(c: PoolClient): Promise<void> {
 
   // b. PAZIENTI: 60, con l'id assegnato dal database.
   // Il paziente 1 è sempre Maria Rossi (DATO FISSO, scenario 10: richiesta 4410).
-  // Gli altri: l'unità di i sceglie il nome, la decina il cognome, quindi non
-  // ci sono omonimi. Il telefono ha un prefisso inesistente (+39 000).
+  // Gli altri: il resto della divisione per 10 sceglie il nome, quello per 7 il
+  // cognome. 10 e 7 non hanno divisori in comune, quindi fino a 70 pazienti non
+  // ci sono omonimi, e due pazienti vicini non hanno mai lo stesso cognome.
+  // Il telefono ha un prefisso inesistente (+39 000).
   // La sede di riferimento ruota tra 1, 2 e 3: 20 pazienti per sede.
   // L'array "pazienti" tiene gli id creati: pazienti[0] è Maria Rossi.
   const pazienti: number[] = [];
   for (let i = 1; i <= NUM_PAZIENTI; i++) {
     const nome = i === 1 ? "Maria" : NOMI[i % 10];
-    const cognome = i === 1 ? "Rossi" : COGNOMI[Math.floor(i / 10) % 6];
+    const cognome = i === 1 ? "Rossi" : COGNOMI[i % 7];
     pazienti.push(
       await inserisci(
         c,
