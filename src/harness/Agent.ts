@@ -164,10 +164,7 @@ export class Agent {
       const approvata = await this.conferma.conferma(chiamata);
       this.log.registra({ tipo: "conferma", tool: chiamata.nome, argomenti: chiamata.argomenti, concessa: approvata });
       if (!approvata) {
-        return (
-          `Chiamata al tool ${chiamata.nome} rifiutata dall'operatore: l'operazione non è stata eseguita. ` +
-          "Non riprovare: comunica all'operatore che non è stata fatta."
-        );
+        return "Operazione annullata: l'operatore non ha confermato, quindi i dati non sono stati modificati.";
       }
     }
 
