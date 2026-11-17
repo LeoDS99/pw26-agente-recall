@@ -362,7 +362,7 @@ Risultato (`structuredContent`):
 - **Casi d'uso:** UC1, UC2
 - **Scenari di test:** 2, 11
 
-**Descrizione** (il testo che riceve il modello): Registra l'esito di una telefonata su una prenotazione e ne aggiorna lo stato. confermato: la prenotazione diventa confermata. disdetto: la prenotazione viene disdetta e lo slot torna libero (slotLiberato = true, slotId = lo slot che si è liberato: per trovargli un sostituto usa proponi_candidati con questo slotId). non_raggiungibile: resta da confermare. MODIFICA i dati.
+**Descrizione** (il testo che riceve il modello): Registra l'esito di una telefonata su una prenotazione e ne aggiorna lo stato. Usalo ogni volta che l'operatore riferisce l'esito di un contatto con un paziente (conferma, disdetta o mancata risposta), anche quando è stato il paziente a chiamare. confermato: la prenotazione diventa confermata. disdetto: la prenotazione viene disdetta e lo slot torna libero (slotLiberato = true, slotId = lo slot che si è liberato: per trovargli un sostituto usa proponi_candidati con questo slotId). non_raggiungibile: resta da confermare. MODIFICA i dati.
 
 **Parametri di ingresso**
 
