@@ -14,7 +14,8 @@ class Agent {
   - maxIterazioni : number
   - promptDiSistema : string
   + esegui(richiesta : string) : Promise<EsitoAgente>
-  - eseguiChiamata(chiamata : ChiamataTool) : Promise<string>
+  - eseguiChiamata(chiamata : ChiamataTool, tools : SpecTool[]) : Promise<string>
+  - concludi(esito : EsitoAgente) : EsitoAgente
 }
 
 interface ModelProvider {
@@ -35,10 +36,12 @@ interface ConfermaUtente {
 class McpToolClient {
   - client : Client
   - server : ComandoServer
+  - collegato : boolean
   + connetti() : Promise<void>
   + elencaTool() : Promise<SpecTool[]>
   + chiamaTool(nome, args) : Promise<EsitoTool>
   + chiudi() : Promise<void>
+  - verificaCollegamento() : void
 }
 
 class JsonlLogger {
