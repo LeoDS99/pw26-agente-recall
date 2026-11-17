@@ -12,6 +12,7 @@
     "db:schema": "tsx --env-file=.env src/backend/sql/applica-schema.ts",
     "db:seed": "tsx --env-file=.env src/backend/seed/seed.ts",
     "db:reset": "npm run db:schema && npm run db:seed",
+    "agente": "tsx --env-file=.env src/harness/index.ts",
     "format": "prettier --write src",
     "format:check": "prettier --check src"
   },
