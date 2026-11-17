@@ -16,7 +16,7 @@ const schemaOutput = z.object({
   prenotazioneId: z.number(),
   esito: z.enum(["confermato", "disdetto", "non_raggiungibile"]),
   statoPrenotazione: z.string().describe("Stato della prenotazione dopo la registrazione"),
-  slotLiberato: z.boolean().describe("true se lo slot è tornato libero e si può riassegnare"),
+  slotLiberato: z.boolean().describe("true se lo slot è tornato libero"),
   slotId: z.number().describe("Numero dello slot della prenotazione"),
 });
 
@@ -25,7 +25,8 @@ export class RegistraEsitoContatto extends RecallTool<typeof schemaInput, typeof
   readonly descrizione =
     "Registra l'esito di una telefonata su una prenotazione e ne aggiorna lo stato. " +
     "confermato: la prenotazione diventa confermata. disdetto: la prenotazione viene disdetta e " +
-    "lo slot torna libero (slotLiberato = true, slotId = lo slot da riassegnare). " +
+    "lo slot torna libero (slotLiberato = true, slotId = lo slot che si è liberato: per trovargli un " +
+    "sostituto usa proponi_candidati con questo slotId). " +
     "non_raggiungibile: resta da confermare. MODIFICA i dati.";
   readonly schemaInput = schemaInput;
   readonly schemaOutput = schemaOutput;

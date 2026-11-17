@@ -21,7 +21,7 @@ Il server MCP `recall-collemare` (`src/mcp-server`) espone sei tool sopra il bac
 - **Errori:** in tutti i casi il tool risponde con `isError: true` e un messaggio, e il server resta in funzione.
   - *Errore di validazione:* un parametro non rispetta lo schema. Il messaggio comincia con `Input validation error`.
   - *Errore di dominio:* la richiesta viola una regola del processo. Il messaggio spiega il motivo.
-  - *Errore tecnico:* per esempio il database non è raggiungibile. Il messaggio è generico (`Errore tecnico: dati non disponibili in questo momento.`) e il dettaglio va solo nel log del server.
+  - *Errore tecnico:* per esempio il database non è raggiungibile. Il messaggio è generico (`Errore tecnico: dati non disponibili in questo momento. Il problema non dipende dalla richiesta: riprovare più tardi.`) e il dettaglio va solo nel log del server.
 
 ## Come provare un tool
 
@@ -362,7 +362,7 @@ Risultato (`structuredContent`):
 - **Casi d'uso:** UC1, UC2
 - **Scenari di test:** 2, 11
 
-**Descrizione** (il testo che riceve il modello): Registra l'esito di una telefonata su una prenotazione e ne aggiorna lo stato. confermato: la prenotazione diventa confermata. disdetto: la prenotazione viene disdetta e lo slot torna libero (slotLiberato = true, slotId = lo slot da riassegnare). non_raggiungibile: resta da confermare. MODIFICA i dati.
+**Descrizione** (il testo che riceve il modello): Registra l'esito di una telefonata su una prenotazione e ne aggiorna lo stato. confermato: la prenotazione diventa confermata. disdetto: la prenotazione viene disdetta e lo slot torna libero (slotLiberato = true, slotId = lo slot che si è liberato: per trovargli un sostituto usa proponi_candidati con questo slotId). non_raggiungibile: resta da confermare. MODIFICA i dati.
 
 **Parametri di ingresso**
 
@@ -378,7 +378,7 @@ Risultato (`structuredContent`):
 | `prenotazioneId` | numero | Numero della prenotazione |
 | `esito` | uno tra: `confermato`, `disdetto`, `non_raggiungibile` | L'esito registrato |
 | `statoPrenotazione` | testo | Stato della prenotazione dopo la registrazione |
-| `slotLiberato` | vero o falso | true se lo slot è tornato libero e si può riassegnare |
+| `slotLiberato` | vero o falso | true se lo slot è tornato libero |
 | `slotId` | numero | Numero dello slot della prenotazione |
 
 **Effetti sui dati:** Aggiunge una riga a `contatti`. Con `confermato` la prenotazione passa a `confermata`. Con `disdetto` la prenotazione passa a `disdetta`, la richiesta a `annullata` e lo slot torna libero. Con `non_raggiungibile` lo stato non cambia. Tutto in una transazione.
@@ -428,7 +428,7 @@ Esempio di errore, ripetendo la stessa chiamata:
 - **Casi d'uso:** UC3
 - **Scenari di test:** 4, 5, 10, 11
 
-**Descrizione** (il testo che riceve il modello): Prenota uno slot libero per una richiesta in lista d'attesa: crea la prenotazione, già confermata, e toglie la richiesta dalla lista. Funziona solo se lo slot è libero e la richiesta è in attesa per la stessa prestazione dello slot: altrimenti risponde con il motivo del rifiuto, che va riferito all'operatore senza cercare di aggirarlo. MODIFICA i dati.
+**Descrizione** (il testo che riceve il modello): Prenota uno slot libero per una richiesta in lista d'attesa: crea la prenotazione, già confermata, e toglie la richiesta dalla lista. Funziona solo se lo slot è libero e la richiesta è in attesa per la stessa prestazione dello slot: altrimenti risponde con il motivo del rifiuto, che va riferito all'operatore senza cercare di aggirarlo. Se l'operatore non indica la richiesta (per esempio «il primo candidato»), chiama prima proponi_candidati e usa il richiestaId che restituisce. MODIFICA i dati.
 
 **Parametri di ingresso**
 
