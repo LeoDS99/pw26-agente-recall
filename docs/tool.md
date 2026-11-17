@@ -83,32 +83,32 @@ Risultato (`structuredContent`):
   "appuntamenti": [
     {
       "prenotazioneId": 12,
-      "paziente": "Luca Greco",
-      "telefono": "+39 000 0000012",
+      "paziente": "Chiara Bianchi",
+      "telefono": "+39 000 0236953",
       "prestazione": "Visita cardiologica",
       "sede": "Collemare Costa",
       "inizio": "2026-11-18 11:00"
     },
     {
       "prenotazioneId": 14,
-      "paziente": "Andrea Bianchi",
-      "telefono": "+39 000 0000014",
+      "paziente": "Andrea Marino",
+      "telefono": "+39 000 7563332",
       "prestazione": "Visita oculistica",
       "sede": "Collemare Costa",
       "inizio": "2026-11-18 11:00"
     },
     {
       "prenotazioneId": 16,
-      "paziente": "Matteo Colombo",
-      "telefono": "+39 000 0000016",
+      "paziente": "Francesca Gallo",
+      "telefono": "+39 000 9417034",
       "prestazione": "Visita dermatologica",
       "sede": "Collemare Costa",
       "inizio": "2026-11-18 11:00"
     },
     {
       "prenotazioneId": 18,
-      "paziente": "Paolo Marino",
-      "telefono": "+39 000 0000018",
+      "paziente": "Paolo Greco",
+      "telefono": "+39 000 6859650",
       "prestazione": "Ecografia addome completo",
       "sede": "Collemare Costa",
       "inizio": "2026-11-18 11:00"
@@ -261,19 +261,19 @@ Risultato (`structuredContent`):
   "candidati": [
     {
       "richiestaId": 262,
-      "paziente": "Luca Colombo",
-      "telefono": "+39 000 0000002",
+      "paziente": "Francesca Marino",
+      "telefono": "+39 000 4426134",
       "classePriorita": "U",
       "dataRichiesta": "2026-11-12",
       "stessaSede": false
     },
     {
       "richiestaId": 263,
-      "paziente": "Luca Greco",
-      "telefono": "+39 000 0000012",
+      "paziente": "Giulia Ricci",
+      "telefono": "+39 000 2752217",
       "classePriorita": "B",
       "dataRichiesta": "2026-10-28",
-      "stessaSede": true
+      "stessaSede": false
     }
   ]
 }
@@ -470,7 +470,7 @@ Risultato (`structuredContent`):
   "prenotazioneId": 261,
   "slotId": 812,
   "richiestaId": 262,
-  "paziente": "Luca Colombo",
+  "paziente": "Francesca Marino",
   "inizio": "2026-11-27 12:30",
   "stato": "confermata"
 }

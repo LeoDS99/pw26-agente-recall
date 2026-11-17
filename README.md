@@ -147,8 +147,9 @@ Remove-Item Env:SERVER_MCP
 
 Lo script `src/backend/seed/seed.ts` crea due tipi di dati:
 
-- **dati di base**, generati da regole fisse e senza valori casuali: ogni
-  lancio produce gli stessi dati, con le date calcolate dal giorno del lancio;
+- **dati di base**, generati da regole fisse e da un generatore pseudo-casuale
+  con un seme fisso: ogni lancio produce gli stessi dati, con le date calcolate
+  dal giorno del lancio;
 - **dati fissi degli scenari di test** (per esempio lo slot 812 e la
   prenotazione 5531), elencati in `docs/scenari-test.md`.
 
