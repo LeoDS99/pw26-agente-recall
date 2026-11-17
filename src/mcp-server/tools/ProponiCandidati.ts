@@ -29,7 +29,8 @@ const schemaOutput = z.object({
 export class ProponiCandidati extends RecallTool<typeof schemaInput, typeof schemaOutput> {
   readonly nome = "proponi_candidati";
   readonly descrizione =
-    "Per uno slot libero, elenca i pazienti in lista d'attesa per la stessa prestazione, " +
+    "Per uno slot libero, elenca i pazienti in lista d'attesa per la stessa prestazione: è la " +
+    "lista di chi chiamare per riempirlo, " +
     "già nell'ordine in cui chiamarli: classe di priorità (U, B, D, P), poi data della " +
     "richiesta, poi sede di riferimento. L'ordine è deciso dal sistema e non va cambiato. " +
     "Non modifica i dati.";

@@ -123,7 +123,7 @@ Risultato (`structuredContent`):
 - **Casi d'uso:** UC4
 - **Scenari di test:** 3, 8, 9
 
-**Descrizione** (il testo che riceve il modello): Elenca gli slot ancora liberi (senza prenotazioni attive) tra due date, con filtri facoltativi per prestazione e sede. Restituisce solo slot futuri. Non modifica i dati.
+**Descrizione** (il testo che riceve il modello): Elenca gli slot ancora liberi (senza prenotazioni attive) tra due date, con filtri facoltativi per prestazione e sede. Restituisce solo slot futuri. Per sapere chi chiamare per riempire uno slot, usa poi proponi_candidati su ciascuno slot. Non modifica i dati.
 
 **Parametri di ingresso**
 
@@ -217,7 +217,7 @@ Esempio di errore, con i parametri:
 - **Casi d'uso:** UC3, UC4
 - **Scenari di test:** 3, 4, 5, 10, 11
 
-**Descrizione** (il testo che riceve il modello): Per uno slot libero, elenca i pazienti in lista d'attesa per la stessa prestazione, già nell'ordine in cui chiamarli: classe di priorità (U, B, D, P), poi data della richiesta, poi sede di riferimento. L'ordine è deciso dal sistema e non va cambiato. Non modifica i dati.
+**Descrizione** (il testo che riceve il modello): Per uno slot libero, elenca i pazienti in lista d'attesa per la stessa prestazione: è la lista di chi chiamare per riempirlo, già nell'ordine in cui chiamarli: classe di priorità (U, B, D, P), poi data della richiesta, poi sede di riferimento. L'ordine è deciso dal sistema e non va cambiato. Non modifica i dati.
 
 **Parametri di ingresso**
 

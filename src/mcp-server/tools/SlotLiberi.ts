@@ -36,6 +36,7 @@ export class SlotLiberi extends RecallTool<typeof schemaInput, typeof schemaOutp
   readonly descrizione =
     "Elenca gli slot ancora liberi (senza prenotazioni attive) tra due date, " +
     "con filtri facoltativi per prestazione e sede. Restituisce solo slot futuri. " +
+    "Per sapere chi chiamare per riempire uno slot, usa poi proponi_candidati su ciascuno slot. " +
     "Non modifica i dati.";
   readonly schemaInput = schemaInput;
   readonly schemaOutput = schemaOutput;

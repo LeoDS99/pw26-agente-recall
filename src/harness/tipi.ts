@@ -73,7 +73,14 @@ export type EventoLog =
   | { tipo: "chiamata_tool"; tool: string; argomenti: Record<string, unknown> }
   | { tipo: "risultato_tool"; tool: string; testo: string; errore: boolean; durataMs: number }
   | { tipo: "errore"; messaggio: string }
-  | { tipo: "fine"; motivo: MotivoArresto; iterazioni: number; token: UsoToken; risposta: string };
+  | {
+      tipo: "fine";
+      motivo: MotivoArresto;
+      iterazioni: number;
+      token: UsoToken;
+      scritture: ChiamataTool[];
+      risposta: string;
+    };
 
 // Il risultato di una richiesta all'agente.
 export interface EsitoAgente {
@@ -81,4 +88,8 @@ export interface EsitoAgente {
   motivo: MotivoArresto; // perché il ciclo si è fermato
   iterazioni: number; // quanti giri ha fatto
   token: UsoToken; // token consumati in totale
+  // Le scritture davvero eseguite (confermate e andate a buon fine). Le conta
+  // l'harness, non il modello: se il modello dice "fatto" ma qui non c'è
+  // niente, il database non è cambiato.
+  scritture: ChiamataTool[];
 }
