@@ -83,35 +83,35 @@ Risultato (`structuredContent`):
   "appuntamenti": [
     {
       "prenotazioneId": 12,
-      "paziente": "Luca Romano",
+      "paziente": "Luca Greco",
       "telefono": "+39 000 0000012",
       "prestazione": "Visita cardiologica",
       "sede": "Collemare Costa",
-      "inizio": "2026-11-12 11:00"
+      "inizio": "2026-11-18 11:00"
     },
     {
       "prenotazioneId": 14,
-      "paziente": "Andrea Romano",
+      "paziente": "Andrea Bianchi",
       "telefono": "+39 000 0000014",
       "prestazione": "Visita oculistica",
       "sede": "Collemare Costa",
-      "inizio": "2026-11-12 11:00"
+      "inizio": "2026-11-18 11:00"
     },
     {
       "prenotazioneId": 16,
-      "paziente": "Matteo Romano",
+      "paziente": "Matteo Colombo",
       "telefono": "+39 000 0000016",
       "prestazione": "Visita dermatologica",
       "sede": "Collemare Costa",
-      "inizio": "2026-11-12 11:00"
+      "inizio": "2026-11-18 11:00"
     },
     {
       "prenotazioneId": 18,
-      "paziente": "Paolo Romano",
+      "paziente": "Paolo Marino",
       "telefono": "+39 000 0000018",
       "prestazione": "Ecografia addome completo",
       "sede": "Collemare Costa",
-      "inizio": "2026-11-12 11:00"
+      "inizio": "2026-11-18 11:00"
     }
   ]
 }
@@ -157,7 +157,7 @@ Risultato (`structuredContent`):
 Parametri:
 
 ```json
-{"dal": "2026-11-12", "al": "2026-11-18", "sede": "Collemare Centro"}
+{"dal": "2026-11-18", "al": "2026-11-24", "sede": "Collemare Centro"}
 ```
 
 Risultato (`structuredContent`):
@@ -169,25 +169,25 @@ Risultato (`structuredContent`):
       "slotId": 127,
       "prestazione": "Ecografia addome completo",
       "sede": "Collemare Centro",
-      "inizio": "2026-11-18 09:00"
+      "inizio": "2026-11-24 09:00"
     },
     {
       "slotId": 129,
       "prestazione": "Risonanza magnetica articolare",
       "sede": "Collemare Centro",
-      "inizio": "2026-11-18 09:00"
+      "inizio": "2026-11-24 09:00"
     },
     {
       "slotId": 128,
       "prestazione": "Ecografia addome completo",
       "sede": "Collemare Centro",
-      "inizio": "2026-11-18 11:00"
+      "inizio": "2026-11-24 11:00"
     },
     {
       "slotId": 130,
       "prestazione": "Risonanza magnetica articolare",
       "sede": "Collemare Centro",
-      "inizio": "2026-11-18 11:00"
+      "inizio": "2026-11-24 11:00"
     }
   ]
 }
@@ -261,18 +261,18 @@ Risultato (`structuredContent`):
   "candidati": [
     {
       "richiestaId": 262,
-      "paziente": "Luca Bianchi",
+      "paziente": "Luca Colombo",
       "telefono": "+39 000 0000002",
       "classePriorita": "U",
-      "dataRichiesta": "2026-11-06",
+      "dataRichiesta": "2026-11-12",
       "stessaSede": false
     },
     {
       "richiestaId": 263,
-      "paziente": "Luca Romano",
+      "paziente": "Luca Greco",
       "telefono": "+39 000 0000012",
       "classePriorita": "B",
-      "dataRichiesta": "2026-10-22",
+      "dataRichiesta": "2026-10-28",
       "stessaSede": true
     }
   ]
@@ -337,7 +337,7 @@ Esempio di errore, con i parametri:
 Parametri:
 
 ```json
-{"dal": "2026-11-11", "prestazione": "Visita cardiologica", "classe": "B"}
+{"dal": "2026-11-17", "prestazione": "Visita cardiologica", "classe": "B"}
 ```
 
 Risultato (`structuredContent`):
@@ -470,8 +470,8 @@ Risultato (`structuredContent`):
   "prenotazioneId": 261,
   "slotId": 812,
   "richiestaId": 262,
-  "paziente": "Luca Bianchi",
-  "inizio": "2026-11-21 12:30",
+  "paziente": "Luca Colombo",
+  "inizio": "2026-11-27 12:30",
   "stato": "confermata"
 }
 ```
