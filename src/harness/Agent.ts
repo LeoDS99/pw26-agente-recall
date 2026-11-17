@@ -70,39 +70,55 @@ export class Agent {
 
     // Il ciclo agentico: ogni giro è una chiamata al modello. Il limite di giri
     // ferma un modello che continua a chiedere tool senza arrivare a una risposta.
-    for (let iterazione = 1; iterazione <= this.maxIterazioni; iterazione++) {
-      // Il modello riceve tutta la conversazione e l'elenco dei tool.
-      this.log.registra({ tipo: "richiesta_modello", iterazione, messaggi: messaggi.length });
-      const risposta = await this.modello.chat(messaggi, tools);
-      this.log.registra({ tipo: "risposta_modello", iterazione, ...risposta });
+    // Un errore grave (il modello non risponde, il collegamento con il server
+    // cade a metà) ferma il ciclo: finisce nel log e l'operatore riceve un
+    // messaggio chiaro, con l'avviso sulle operazioni forse già eseguite.
+    let iterazione = 0;
+    try {
+      for (iterazione = 1; iterazione <= this.maxIterazioni; iterazione++) {
+        // Il modello riceve tutta la conversazione e l'elenco dei tool.
+        this.log.registra({ tipo: "richiesta_modello", iterazione, messaggi: messaggi.length });
+        const risposta = await this.modello.chat(messaggi, tools);
+        this.log.registra({ tipo: "risposta_modello", iterazione, ...risposta });
 
-      const { ingresso, uscita } = risposta.token;
-      tokenTotali.ingresso += ingresso;
-      tokenTotali.uscita += uscita;
+        const { ingresso, uscita } = risposta.token;
+        tokenTotali.ingresso += ingresso;
+        tokenTotali.uscita += uscita;
 
-      // Condizione di arresto: se il modello non chiede tool, il suo testo è la
-      // risposta finale per l'operatore.
-      if (risposta.chiamate.length === 0) {
-        return this.concludi({
-          risposta: risposta.testo,
-          motivo: "risposta_finale",
-          iterazioni: iterazione,
-          token: tokenTotali,
-        });
+        // Condizione di arresto: se il modello non chiede tool, il suo testo è la
+        // risposta finale per l'operatore.
+        if (risposta.chiamate.length === 0) {
+          return this.concludi({
+            risposta: risposta.testo,
+            motivo: "risposta_finale",
+            iterazioni: iterazione,
+            token: tokenTotali,
+          });
+        }
+
+        // Altrimenti il modello ha chiesto uno o più tool. La sua risposta entra
+        // nella conversazione, così al prossimo giro sa che cosa aveva chiesto.
+        messaggi.push({ ruolo: "modello", testo: risposta.testo, chiamate: risposta.chiamate });
+
+        // Le chiamate si eseguono una alla volta, nell'ordine deciso dal modello.
+        // Il testo di ognuna (risultato o errore) entra nella conversazione come
+        // messaggio "tool": il modello lo legge al prossimo giro.
+        for (const chiamata of risposta.chiamate) {
+          const { nome } = chiamata;
+          const esitoTool = await this.eseguiChiamata(chiamata, tools);
+          messaggi.push({ ruolo: "tool", nomeTool: nome, testo: esitoTool });
+        }
       }
-
-      // Altrimenti il modello ha chiesto uno o più tool. La sua risposta entra
-      // nella conversazione, così al prossimo giro sa che cosa aveva chiesto.
-      messaggi.push({ ruolo: "modello", testo: risposta.testo, chiamate: risposta.chiamate });
-
-      // Le chiamate si eseguono una alla volta, nell'ordine deciso dal modello.
-      // Il testo di ognuna (risultato o errore) entra nella conversazione come
-      // messaggio "tool": il modello lo legge al prossimo giro.
-      for (const chiamata of risposta.chiamate) {
-        const { nome } = chiamata;
-        const esitoTool = await this.eseguiChiamata(chiamata, tools);
-        messaggi.push({ ruolo: "tool", nomeTool: nome, testo: esitoTool });
-      }
+    } catch (errore) {
+      this.log.registra({ tipo: "errore", messaggio: testoErrore(errore) });
+      return this.concludi({
+        risposta:
+          "Si è verificato un errore durante l'esecuzione della richiesta. " +
+          "Alcune operazioni potrebbero essere già state eseguite: controlla prima di riprovare.",
+        motivo: "errore",
+        iterazioni: iterazione,
+        token: tokenTotali,
+      });
     }
 
     // Limite di giri raggiunto senza una risposta finale. Il messaggio dice che
