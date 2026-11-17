@@ -3,6 +3,7 @@
 // chiede l'elenco dei tool e li chiama. Non contiene la logica dell'agente:
 // decidere quale tool chiamare, e se chiedere conferma, è compito di Agent.
 
+import { openSync } from "node:fs";
 import { Client } from "@modelcontextprotocol/client";
 import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 import type { EsitoTool, SpecTool } from "./tipi.ts";
@@ -11,6 +12,9 @@ import type { EsitoTool, SpecTool } from "./tipi.ts";
 export interface ComandoServer {
   comando: string;
   argomenti: string[];
+  // Dove scrivere i messaggi d'errore del server (il suo stderr). Se manca,
+  // finiscono nel terminale dell'harness, in mezzo al dialogo con l'operatore.
+  fileErrori?: string;
 }
 
 export class McpToolClient {
@@ -26,7 +30,13 @@ export class McpToolClient {
   // Avvia il server e si collega. Se il comando è sbagliato o il server non
   // parte, lancia un errore: chi chiama decide cosa fare (scenario 12).
   async connetti(): Promise<void> {
-    const trasporto = new StdioClientTransport({ command: this.server.comando, args: this.server.argomenti });
+    const { comando, argomenti, fileErrori } = this.server;
+    const trasporto = new StdioClientTransport({
+      command: comando,
+      args: argomenti,
+      // Il file si apre in aggiunta ("a"): il server ci scrive direttamente.
+      stderr: fileErrori === undefined ? "inherit" : openSync(fileErrori, "a"),
+    });
     // Se il server si ferma o la connessione cade, l'SDK ci avvisa qui.
     this.client.onclose = () => {
       this.collegato = false;

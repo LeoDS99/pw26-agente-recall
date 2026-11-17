@@ -16,12 +16,14 @@ verifica dei tempi d'attesa.
 |---|---|---|
 | Back-end e dati sintetici | `src/backend` | fatto |
 | Server MCP | `src/mcp-server` | fatto |
-| Harness agentico | `src/harness` | in sviluppo |
+| Harness agentico | `src/harness` | fatto |
+| Esecuzione degli scenari di test | `docs/scenari-test.md` | in corso |
 
 ## Requisiti
 
 - Node.js 22 o successivo
 - Docker Desktop (per il database PostgreSQL 18)
+- Ollama, con il modello `qwen3:4b-instruct` (per l'harness)
 - Git
 
 Per provare il server con MCP Inspector serve Node.js 22.23.4 o successivo
@@ -34,6 +36,7 @@ git clone https://github.com/LeoDS99/pw26-agente-recall.git
 cd pw26-agente-recall
 cp .env.example .env
 npm ci
+ollama pull qwen3:4b-instruct
 ```
 
 Il file `.env` contiene le credenziali del database locale. I valori di
@@ -72,8 +75,8 @@ Per fermare il database: `npm run db:down`.
 ### Server MCP
 
 Il server MCP espone sei tool sopra il back-end, descritti in `docs/tool.md`.
-Usa il trasporto stdio: non si avvia a mano, lo avvia il client (MCP Inspector
-oppure l'harness) con questo comando:
+Usa il trasporto stdio: non si avvia a mano, lo avvia il client. L'harness lo
+avvia da solo; MCP Inspector (vedi sotto) con questo comando:
 
 ```
 npx tsx --env-file=.env src/mcp-server/index.ts
@@ -95,6 +98,50 @@ npx -y @modelcontextprotocol/inspector --cli --method tools/call --tool-name pro
 Gli apici intorno a `'--'` servono in PowerShell. I due tool di scrittura
 (`registra_esito_contatto` e `riassegna_slot`) modificano i dati: dopo averli
 provati va rilanciato `npm run db:reset`.
+
+### Agente (harness)
+
+L'harness è l'agente vero e proprio: una riga di comando in cui l'operatore
+scrive le richieste in italiano. Avvia da solo il server MCP e usa un modello
+locale tramite Ollama. Con il database avviato e popolato, e Ollama acceso:
+
+```
+npm run agente
+```
+
+Per ogni richiesta l'agente risponde e stampa una riga di servizio con il motivo
+per cui si è fermato, il numero di giri e i token consumati. Prima di eseguire
+un tool che modifica i dati mostra cosa sta per fare e chiede conferma: vale come
+sì solo `s`, `si` o `sì`; qualunque altra risposta annulla l'operazione. Per uscire
+si scrive `esci`.
+
+L'agente non ricorda le richieste precedenti: ogni richiesta va scritta completa,
+con i numeri di appuntamento, slot o richiesta. Se Ollama non è acceso, ogni
+richiesta finisce con il motivo `errore`.
+
+Per ogni avvio, nella cartella `logs/` (esclusa da git):
+
+- `sessione-AAAA-MM-GGTHH-MM-SS.jsonl`: il log di ogni passo (richieste al
+  modello, tool chiamati con i parametri, risultati, conferme, token);
+- `sessione-AAAA-MM-GGTHH-MM-SS-server.log`: i messaggi d'errore tecnici del
+  server MCP, che così non compaiono nel terminale dell'operatore.
+
+Due variabili d'ambiente, facoltative, cambiano il comportamento senza toccare
+il codice:
+
+| Variabile | Predefinito | A cosa serve |
+|---|---|---|
+| `MODELLO` | `qwen3:4b-instruct` | usare un altro modello di Ollama |
+| `SERVER_MCP` | `src/mcp-server/index.ts` | con un percorso sbagliato il server non parte: è lo scenario di test 12 |
+
+Si possono scrivere nel file `.env` oppure, solo per il terminale aperto, in
+PowerShell:
+
+```
+$env:SERVER_MCP = "src/non-esiste.ts"
+npm run agente
+Remove-Item Env:SERVER_MCP
+```
 
 ## Dati sintetici
 
@@ -131,6 +178,17 @@ src/mcp-server/
   RecallTool.ts        classe base dei tool
   date.ts              calcoli sulle date
   tools/               i sei tool, uno per file
+src/harness/
+  index.ts             punto di avvio dell'agente
+  Cli.ts               riga di comando e conferma dell'operatore
+  Agent.ts             il ciclo agentico
+  prompt.ts            prompt di sistema
+  McpToolClient.ts     collegamento al server MCP
+  ModelProvider.ts     astrazione dal fornitore del modello
+  OllamaProvider.ts    modello locale tramite Ollama
+  ConfermaUtente.ts    interfaccia della conferma prima delle scritture
+  JsonlLogger.ts       log in formato JSON Lines
+  tipi.ts              tipi di dato
 ```
 
 ## Comandi
@@ -142,6 +200,7 @@ src/mcp-server/
 | `npm run db:schema` | ricrea le tabelle vuote |
 | `npm run db:seed` | inserisce i dati sintetici |
 | `npm run db:reset` | `db:schema` + `db:seed` |
+| `npm run agente` | avvia l'agente (riga di comando) |
 | `npm run typecheck` | controlla i tipi TypeScript |
 | `npm run format` | formatta il codice con Prettier |
 | `npm run format:check` | controlla la formattazione senza modificare i file |

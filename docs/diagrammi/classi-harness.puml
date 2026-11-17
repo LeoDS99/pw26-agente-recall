@@ -6,8 +6,11 @@ title Harness agentico
 class Client <<SDK>>
 
 class Cli {
-  + avvia() : Promise<void>
+  - terminale : Interface
+  + avvia(agente : Agent) : Promise<void>
   + conferma(chiamata : ChiamataTool) : Promise<boolean>
+  + avvisa(testo : string) : void
+  + chiudi() : void
 }
 
 class Agent {
