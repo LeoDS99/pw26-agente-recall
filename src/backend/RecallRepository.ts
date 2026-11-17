@@ -4,8 +4,8 @@
 // riassegnazioni valide, tempi d'attesa), così non dipendono dal modello.
 
 import type { Pool } from "pg";
-import { ErroreDominio } from "./ErroreDominio.js";
-import { SoglieAttesa } from "./SoglieAttesa.js";
+import { ErroreDominio } from "./ErroreDominio.ts";
+import { SoglieAttesa } from "./SoglieAttesa.ts";
 import type {
   AppuntamentoDaConfermare,
   SlotLibero,
@@ -17,7 +17,7 @@ import type {
   EsitoContatto,
   EsitoRegistrato,
   Riassegnazione,
-} from "./tipi.js";
+} from "./tipi.ts";
 
 export class RecallRepository {
   // Il pool di connessioni arriva da fuori (dal server MCP), non è creato qui.

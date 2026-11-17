@@ -2,9 +2,9 @@
 // date, con filtri facoltativi su prestazione e sede. Caso d'uso UC4.
 
 import * as z from "zod/v4";
-import { NOMI_PRESTAZIONI, NOMI_SEDI, idPrestazione, idSede } from "../../backend/catalogo.js";
-import { GIORNI_PREDEFINITI, dataFinale } from "../date.js";
-import { RecallTool } from "../RecallTool.js";
+import { NOMI_PRESTAZIONI, NOMI_SEDI, idPrestazione, idSede } from "../../backend/catalogo.ts";
+import { GIORNI_PREDEFINITI, dataFinale } from "../date.ts";
+import { RecallTool } from "../RecallTool.ts";
 
 // z.iso.date() accetta solo date vere nel formato AAAA-MM-GG: il 31 febbraio
 // viene rifiutato qui, prima di arrivare al database (scenario 9).

@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { pool } from "../db.js";
+import { pool } from "../db.ts";
 
 // Legge schema.sql dalla stessa cartella di questo file e lo esegue.
 const sql = await readFile(new URL("./schema.sql", import.meta.url), "utf8");

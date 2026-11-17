@@ -6,8 +6,8 @@
 
 import { McpServer } from "@modelcontextprotocol/server";
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
-import { ErroreDominio } from "../backend/ErroreDominio.js";
-import type { RecallTool } from "./RecallTool.js";
+import { ErroreDominio } from "../backend/ErroreDominio.ts";
+import type { RecallTool } from "./RecallTool.ts";
 
 export class RecallMcpServer {
   private readonly server: McpServer;

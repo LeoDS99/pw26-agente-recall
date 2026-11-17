@@ -3,6 +3,7 @@
     "target": "es2024",
     "module": "nodenext",
     "moduleResolution": "nodenext",
+    "rewriteRelativeImportExtensions": true,
     "types": ["node"],
     "strict": true,
     "skipLibCheck": true,

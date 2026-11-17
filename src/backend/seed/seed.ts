@@ -18,8 +18,8 @@
 // =============================================================================
 
 import type { PoolClient } from "pg";
-import { pool } from "../db.js";
-import { CENTRO, COSTA, VALLE, CARDIOLOGICA, OCULISTICA, DERMATOLOGICA, SEDI, PRESTAZIONI } from "../catalogo.js";
+import { pool } from "../db.ts";
+import { CENTRO, COSTA, VALLE, CARDIOLOGICA, OCULISTICA, DERMATOLOGICA, SEDI, PRESTAZIONI } from "../catalogo.ts";
 
 // --- 1. DATE: tutto è relativo al giorno del lancio --------------------------
 

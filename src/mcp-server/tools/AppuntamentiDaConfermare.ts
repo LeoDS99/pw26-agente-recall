@@ -3,8 +3,8 @@
 // giro di conferme. Caso d'uso UC1.
 
 import * as z from "zod/v4";
-import { NOMI_SEDI, idSede } from "../../backend/catalogo.js";
-import { RecallTool } from "../RecallTool.js";
+import { NOMI_SEDI, idSede } from "../../backend/catalogo.ts";
+import { RecallTool } from "../RecallTool.ts";
 
 const schemaInput = z.object({
   giorni: z.number().int().min(1).max(14).describe("Quanti giorni guardare, a partire da domani (1 = solo domani)"),
