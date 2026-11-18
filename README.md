@@ -17,7 +17,7 @@ verifica dei tempi d'attesa.
 | Back-end e dati sintetici | `src/backend` | fatto |
 | Server MCP | `src/mcp-server` | fatto |
 | Harness agentico | `src/harness` | fatto |
-| Esecuzione degli scenari di test | `docs/scenari-test.md` | in corso |
+| Esecuzione degli scenari di test | `docs/scenari-test.md`, `docs/estratti-log` | fatto |
 
 ## Requisiti
 
@@ -202,6 +202,8 @@ docs/
   casi-uso.md          casi d'uso
   scenari-test.md      scenari di test e dati fissi
   tool.md              documentazione dei tool del server MCP
+  estratti-log/        estratti dei log del giro ufficiale degli scenari
+  screenshot/          schermate della riga di comando
   diagrammi/           diagrammi UML ed ER (PlantUML)
 src/backend/
   db.ts                connessione al database

@@ -1,0 +1,9 @@
+{"ora":"2026-11-18T14:12:58.013Z","tipo":"inizio","richiesta":"Il paziente dell'appuntamento 5531 ha disdetto","modello":"ollama/qwen3:30b-instruct","scambiInMemoria":0}
+{"ora":"2026-11-18T14:12:58.019Z","tipo":"richiesta_modello","iterazione":1,"messaggi":2}
+{"ora":"2026-11-18T14:13:07.191Z","tipo":"risposta_modello","iterazione":1,"testo":"","chiamate":[{"nome":"registra_esito_contatto","argomenti":{"prenotazioneId":5531,"esito":"disdetto"}}],"token":{"ingresso":2256,"uscita":40},"durataMs":9171}
+{"ora":"2026-11-18T14:13:07.192Z","tipo":"conferma","tool":"registra_esito_contatto","argomenti":{"prenotazioneId":5531,"esito":"disdetto"},"concessa":true}
+{"ora":"2026-11-18T14:13:07.193Z","tipo":"chiamata_tool","tool":"registra_esito_contatto","argomenti":{"prenotazioneId":5531,"esito":"disdetto"}}
+{"ora":"2026-11-18T14:13:07.270Z","tipo":"risultato_tool","tool":"registra_esito_contatto","testo":"{\"prenotazioneId\":5531,\"esito\":\"disdetto\",\"statoPrenotazione\":\"disdetta\",\"slotLiberato\":true,\"slotId\":61}","errore":false,"durataMs":76}
+{"ora":"2026-11-18T14:13:07.271Z","tipo":"richiesta_modello","iterazione":2,"messaggi":4}
+{"ora":"2026-11-18T14:13:21.452Z","tipo":"risposta_modello","iterazione":2,"testo":"Lo slot 61 è stato liberato. Chiamo proponi_candidati per trovare un sostituto.","chiamate":[],"token":{"ingresso":2351,"uscita":26},"durataMs":14180}
+{"ora":"2026-11-18T14:13:21.453Z","tipo":"fine","risposta":"Lo slot 61 è stato liberato. Chiamo proponi_candidati per trovare un sostituto.","motivo":"risposta_finale","iterazioni":2,"token":{"ingresso":4607,"uscita":66},"scritture":[{"nome":"registra_esito_contatto","argomenti":{"prenotazioneId":5531,"esito":"disdetto"}}]}
