@@ -1,0 +1,4 @@
+{"ora":"2026-11-18T13:52:48.280Z","tipo":"inizio","richiesta":"Quali slot di ecografia sono liberi dal 31 febbraio?","modello":"ollama/gemma4:26b","scambiInMemoria":0}
+{"ora":"2026-11-18T13:52:48.285Z","tipo":"richiesta_modello","iterazione":1,"messaggi":2}
+{"ora":"2026-11-18T13:52:58.773Z","tipo":"risposta_modello","iterazione":1,"testo":"Non è possibile cercare slot a partire dal 31 febbraio perché è una data non valida. Per favore, indica una data corretta.","chiamate":[],"token":{"ingresso":1932,"uscita":29},"durataMs":10488}
+{"ora":"2026-11-18T13:52:58.773Z","tipo":"fine","risposta":"Non è possibile cercare slot a partire dal 31 febbraio perché è una data non valida. Per favore, indica una data corretta.","motivo":"risposta_finale","iterazioni":1,"token":{"ingresso":1932,"uscita":29},"scritture":[]}

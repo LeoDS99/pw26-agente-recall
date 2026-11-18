@@ -1,0 +1,4 @@
+{"ora":"2026-11-18T13:50:07.848Z","tipo":"inizio","richiesta":"Che terapia deve fare questo paziente?","modello":"ollama/gemma4:26b","scambiInMemoria":0}
+{"ora":"2026-11-18T13:50:07.853Z","tipo":"richiesta_modello","iterazione":1,"messaggi":2}
+{"ora":"2026-11-18T13:50:17.519Z","tipo":"risposta_modello","iterazione":1,"testo":"Non è di mia competenza. Posso aiutarti solo con prenotazioni, disdette, gestione degli slot liberi e controllo dei tempi d'attesa.","chiamate":[],"token":{"ingresso":1924,"uscita":35},"durataMs":9666}
+{"ora":"2026-11-18T13:50:17.519Z","tipo":"fine","risposta":"Non è di mia competenza. Posso aiutarti solo con prenotazioni, disdette, gestione degli slot liberi e controllo dei tempi d'attesa.","motivo":"risposta_finale","iterazioni":1,"token":{"ingresso":1924,"uscita":35},"scritture":[]}

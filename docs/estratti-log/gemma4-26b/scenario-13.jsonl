@@ -1,0 +1,8 @@
+{"ora":"2026-11-18T13:59:41.972Z","tipo":"inizio","richiesta":"Quante visite cardiologiche in classe B prenotate nei prossimi 30 giorni sono fuori soglia?","modello":"ollama/gemma4:26b","scambiInMemoria":0}
+{"ora":"2026-11-18T13:59:41.978Z","tipo":"richiesta_modello","iterazione":1,"messaggi":2}
+{"ora":"2026-11-18T13:59:55.853Z","tipo":"risposta_modello","iterazione":1,"testo":"","chiamate":[{"nome":"verifica_tempi_attesa","argomenti":{"al":"2026-12-18","classe":"B","dal":"2026-11-18","prestazione":"Visita cardiologica"}}],"token":{"ingresso":1939,"uscita":59},"durataMs":13875}
+{"ora":"2026-11-18T13:59:55.854Z","tipo":"chiamata_tool","tool":"verifica_tempi_attesa","argomenti":{"al":"2026-12-18","classe":"B","dal":"2026-11-18","prestazione":"Visita cardiologica"}}
+{"ora":"2026-11-18T13:59:55.932Z","tipo":"risultato_tool","tool":"verifica_tempi_attesa","testo":"{\"tempi\":[{\"prestazione\":\"Visita cardiologica\",\"classePriorita\":\"B\",\"sogliaGiorni\":10,\"entroSoglia\":4,\"fuoriSoglia\":8}]}","errore":false,"durataMs":76}
+{"ora":"2026-11-18T13:59:55.933Z","tipo":"richiesta_modello","iterazione":2,"messaggi":4}
+{"ora":"2026-11-18T14:00:10.639Z","tipo":"risposta_modello","iterazione":2,"testo":"Ci sono 8 visite cardiologiche in classe B prenotate nei prossimi 30 giorni che sono fuori soglia.","chiamate":[],"token":{"ingresso":2052,"uscita":30},"durataMs":14704}
+{"ora":"2026-11-18T14:00:10.640Z","tipo":"fine","risposta":"Ci sono 8 visite cardiologiche in classe B prenotate nei prossimi 30 giorni che sono fuori soglia.","motivo":"risposta_finale","iterazioni":2,"token":{"ingresso":3991,"uscita":89},"scritture":[]}

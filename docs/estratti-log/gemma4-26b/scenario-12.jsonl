@@ -1,0 +1,4 @@
+{"ora":"2026-11-18T13:59:27.895Z","tipo":"errore","messaggio":"Server MCP non raggiungibile all'avvio: SdkError: Connection closed"}
+{"ora":"2026-11-18T13:59:27.896Z","tipo":"inizio","richiesta":"Quali appuntamenti di domani a Collemare Costa non sono ancora confermati?","modello":"ollama/gemma4:26b","scambiInMemoria":0}
+{"ora":"2026-11-18T13:59:27.896Z","tipo":"errore","messaggio":"Server MCP non collegato."}
+{"ora":"2026-11-18T13:59:27.897Z","tipo":"fine","risposta":"Il sistema delle prenotazioni non è raggiungibile in questo momento: non posso leggere né modificare i dati. Riprova più tardi.","motivo":"server_non_disponibile","iterazioni":0,"token":{"ingresso":0,"uscita":0},"scritture":[]}

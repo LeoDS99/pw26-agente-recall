@@ -1,0 +1,426 @@
+{
+  "modello": "gemma4:26b",
+  "ripetizioni": 3,
+  "riepilogo": [
+    {
+      "scenario": 1,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4192,
+      "tokenUscita": 208,
+      "secondi": 46,
+      "scritture": 0
+    },
+    {
+      "scenario": 1,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4192,
+      "tokenUscita": 208,
+      "secondi": 55,
+      "scritture": 0
+    },
+    {
+      "scenario": 1,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4192,
+      "tokenUscita": 208,
+      "secondi": 56,
+      "scritture": 0
+    },
+    {
+      "scenario": 2,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 3949,
+      "tokenUscita": 62,
+      "secondi": 19,
+      "scritture": 1
+    },
+    {
+      "scenario": 2,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 3949,
+      "tokenUscita": 62,
+      "secondi": 17,
+      "scritture": 1
+    },
+    {
+      "scenario": 2,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 3949,
+      "tokenUscita": 62,
+      "secondi": 19,
+      "scritture": 1
+    },
+    {
+      "scenario": 3,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 7748,
+      "tokenUscita": 814,
+      "secondi": 242,
+      "scritture": 0
+    },
+    {
+      "scenario": 3,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 7748,
+      "tokenUscita": 827,
+      "secondi": 263,
+      "scritture": 0
+    },
+    {
+      "scenario": 3,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 7748,
+      "tokenUscita": 847,
+      "secondi": 303,
+      "scritture": 0
+    },
+    {
+      "scenario": 4,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 6614,
+      "tokenUscita": 147,
+      "secondi": 76,
+      "scritture": 1
+    },
+    {
+      "scenario": 4,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 6614,
+      "tokenUscita": 147,
+      "secondi": 65,
+      "scritture": 1
+    },
+    {
+      "scenario": 4,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 6614,
+      "tokenUscita": 147,
+      "secondi": 63,
+      "scritture": 1
+    },
+    {
+      "scenario": 5,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 6579,
+      "tokenUscita": 107,
+      "secondi": 52,
+      "scritture": 0
+    },
+    {
+      "scenario": 5,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 6579,
+      "tokenUscita": 107,
+      "secondi": 69,
+      "scritture": 0
+    },
+    {
+      "scenario": 5,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 6579,
+      "tokenUscita": 107,
+      "secondi": 63,
+      "scritture": 0
+    },
+    {
+      "scenario": 6,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 1923,
+      "tokenUscita": 80,
+      "secondi": 20,
+      "scritture": 0
+    },
+    {
+      "scenario": 6,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 1923,
+      "tokenUscita": 82,
+      "secondi": 19,
+      "scritture": 0
+    },
+    {
+      "scenario": 6,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 1923,
+      "tokenUscita": 82,
+      "secondi": 18,
+      "scritture": 0
+    },
+    {
+      "scenario": 7,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 1924,
+      "tokenUscita": 35,
+      "secondi": 10,
+      "scritture": 0
+    },
+    {
+      "scenario": 7,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 1924,
+      "tokenUscita": 35,
+      "secondi": 8,
+      "scritture": 0
+    },
+    {
+      "scenario": 7,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 1924,
+      "tokenUscita": 35,
+      "secondi": 10,
+      "scritture": 0
+    },
+    {
+      "scenario": 8,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 3942,
+      "tokenUscita": 99,
+      "secondi": 41,
+      "scritture": 0
+    },
+    {
+      "scenario": 8,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 3942,
+      "tokenUscita": 99,
+      "secondi": 34,
+      "scritture": 0
+    },
+    {
+      "scenario": 8,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 3942,
+      "tokenUscita": 99,
+      "secondi": 31,
+      "scritture": 0
+    },
+    {
+      "scenario": 9,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 1932,
+      "tokenUscita": 29,
+      "secondi": 10,
+      "scritture": 0
+    },
+    {
+      "scenario": 9,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 1932,
+      "tokenUscita": 33,
+      "secondi": 8,
+      "scritture": 0
+    },
+    {
+      "scenario": 9,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 1932,
+      "tokenUscita": 33,
+      "secondi": 9,
+      "scritture": 0
+    },
+    {
+      "scenario": 10,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 3937,
+      "tokenUscita": 76,
+      "secondi": 22,
+      "scritture": 0
+    },
+    {
+      "scenario": 10,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 3937,
+      "tokenUscita": 76,
+      "secondi": 37,
+      "scritture": 0
+    },
+    {
+      "scenario": 10,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 3937,
+      "tokenUscita": 76,
+      "secondi": 22,
+      "scritture": 0
+    },
+    {
+      "scenario": 11,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 4,
+      "tokenIngresso": 8819,
+      "tokenUscita": 170,
+      "secondi": 87,
+      "scritture": 2
+    },
+    {
+      "scenario": 11,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 4,
+      "tokenIngresso": 8819,
+      "tokenUscita": 170,
+      "secondi": 89,
+      "scritture": 2
+    },
+    {
+      "scenario": 11,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 4,
+      "tokenIngresso": 8819,
+      "tokenUscita": 170,
+      "secondi": 72,
+      "scritture": 2
+    },
+    {
+      "scenario": 12,
+      "ripetizione": 1,
+      "motivo": "server_non_disponibile",
+      "giri": 0,
+      "tokenIngresso": 0,
+      "tokenUscita": 0,
+      "secondi": 0,
+      "scritture": 0
+    },
+    {
+      "scenario": 12,
+      "ripetizione": 2,
+      "motivo": "server_non_disponibile",
+      "giri": 0,
+      "tokenIngresso": 0,
+      "tokenUscita": 0,
+      "secondi": 0,
+      "scritture": 0
+    },
+    {
+      "scenario": 12,
+      "ripetizione": 3,
+      "motivo": "server_non_disponibile",
+      "giri": 0,
+      "tokenIngresso": 0,
+      "tokenUscita": 0,
+      "secondi": 0,
+      "scritture": 0
+    },
+    {
+      "scenario": 13,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 3991,
+      "tokenUscita": 89,
+      "secondi": 29,
+      "scritture": 0
+    },
+    {
+      "scenario": 13,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 3991,
+      "tokenUscita": 89,
+      "secondi": 24,
+      "scritture": 0
+    },
+    {
+      "scenario": 13,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 3991,
+      "tokenUscita": 89,
+      "secondi": 24,
+      "scritture": 0
+    },
+    {
+      "scenario": 14,
+      "ripetizione": 1,
+      "motivo": "risposta_finale / risposta_finale",
+      "giri": 4,
+      "tokenIngresso": 8813,
+      "tokenUscita": 236,
+      "secondi": 89,
+      "scritture": 1
+    },
+    {
+      "scenario": 14,
+      "ripetizione": 2,
+      "motivo": "risposta_finale / risposta_finale",
+      "giri": 4,
+      "tokenIngresso": 8813,
+      "tokenUscita": 236,
+      "secondi": 88,
+      "scritture": 1
+    },
+    {
+      "scenario": 14,
+      "ripetizione": 3,
+      "motivo": "risposta_finale / risposta_finale",
+      "giri": 4,
+      "tokenIngresso": 8813,
+      "tokenUscita": 236,
+      "secondi": 84,
+      "scritture": 1
+    }
+  ]
+}

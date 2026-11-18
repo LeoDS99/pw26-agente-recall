@@ -1,0 +1,8 @@
+{"ora":"2026-11-18T13:50:51.062Z","tipo":"inizio","richiesta":"Ci sono slot liberi di cardiologia la prossima settimana?","modello":"ollama/gemma4:26b","scambiInMemoria":0}
+{"ora":"2026-11-18T13:50:51.067Z","tipo":"richiesta_modello","iterazione":1,"messaggi":2}
+{"ora":"2026-11-18T13:51:06.706Z","tipo":"risposta_modello","iterazione":1,"testo":"","chiamate":[{"nome":"slot_liberi","argomenti":{"al":"2026-11-30","dal":"2026-11-23","prestazione":"Visita cardiologica"}}],"token":{"ingresso":1929,"uscita":50},"durataMs":15638}
+{"ora":"2026-11-18T13:51:06.707Z","tipo":"chiamata_tool","tool":"slot_liberi","argomenti":{"al":"2026-11-30","dal":"2026-11-23","prestazione":"Visita cardiologica"}}
+{"ora":"2026-11-18T13:51:06.755Z","tipo":"risultato_tool","tool":"slot_liberi","testo":"Errore tecnico: dati non disponibili in questo momento. Il problema non dipende dalla richiesta: riprovare più tardi.","errore":true,"durataMs":46}
+{"ora":"2026-11-18T13:51:06.755Z","tipo":"richiesta_modello","iterazione":2,"messaggi":4}
+{"ora":"2026-11-18T13:51:26.619Z","tipo":"risposta_modello","iterazione":2,"testo":"Mi dispiace, ma al momento non riesco a recuperare i dati sugli slot liberi per la visita cardiologica della prossima settimana a causa di un errore tecnico del sistema. Riprova tra qualche momento.","chiamate":[],"token":{"ingresso":2013,"uscita":49},"durataMs":19863}
+{"ora":"2026-11-18T13:51:26.620Z","tipo":"fine","risposta":"Mi dispiace, ma al momento non riesco a recuperare i dati sugli slot liberi per la visita cardiologica della prossima settimana a causa di un errore tecnico del sistema. Riprova tra qualche momento.","motivo":"risposta_finale","iterazioni":2,"token":{"ingresso":3942,"uscita":99},"scritture":[]}

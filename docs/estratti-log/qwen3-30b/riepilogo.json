@@ -1,0 +1,426 @@
+{
+  "modello": "qwen3:30b-instruct",
+  "ripetizioni": 3,
+  "riepilogo": [
+    {
+      "scenario": 1,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4867,
+      "tokenUscita": 246,
+      "secondi": 262,
+      "scritture": 0
+    },
+    {
+      "scenario": 1,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4867,
+      "tokenUscita": 250,
+      "secondi": 77,
+      "scritture": 0
+    },
+    {
+      "scenario": 1,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4867,
+      "tokenUscita": 250,
+      "secondi": 76,
+      "scritture": 0
+    },
+    {
+      "scenario": 2,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4607,
+      "tokenUscita": 66,
+      "secondi": 23,
+      "scritture": 1
+    },
+    {
+      "scenario": 2,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4607,
+      "tokenUscita": 94,
+      "secondi": 27,
+      "scritture": 1
+    },
+    {
+      "scenario": 2,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4607,
+      "tokenUscita": 94,
+      "secondi": 23,
+      "scritture": 1
+    },
+    {
+      "scenario": 3,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 6,
+      "tokenIngresso": 18554,
+      "tokenUscita": 1091,
+      "secondi": 485,
+      "scritture": 0
+    },
+    {
+      "scenario": 3,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4790,
+      "tokenUscita": 757,
+      "secondi": 188,
+      "scritture": 0
+    },
+    {
+      "scenario": 3,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4790,
+      "tokenUscita": 757,
+      "secondi": 192,
+      "scritture": 0
+    },
+    {
+      "scenario": 4,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 7117,
+      "tokenUscita": 124,
+      "secondi": 34,
+      "scritture": 1
+    },
+    {
+      "scenario": 4,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 7117,
+      "tokenUscita": 120,
+      "secondi": 34,
+      "scritture": 1
+    },
+    {
+      "scenario": 4,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 7117,
+      "tokenUscita": 120,
+      "secondi": 32,
+      "scritture": 1
+    },
+    {
+      "scenario": 5,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 7079,
+      "tokenUscita": 117,
+      "secondi": 30,
+      "scritture": 0
+    },
+    {
+      "scenario": 5,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 7079,
+      "tokenUscita": 117,
+      "secondi": 30,
+      "scritture": 0
+    },
+    {
+      "scenario": 5,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 3,
+      "tokenIngresso": 7079,
+      "tokenUscita": 117,
+      "secondi": 29,
+      "scritture": 0
+    },
+    {
+      "scenario": 6,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 2246,
+      "tokenUscita": 50,
+      "secondi": 8,
+      "scritture": 0
+    },
+    {
+      "scenario": 6,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 2246,
+      "tokenUscita": 50,
+      "secondi": 8,
+      "scritture": 0
+    },
+    {
+      "scenario": 6,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 2246,
+      "tokenUscita": 50,
+      "secondi": 8,
+      "scritture": 0
+    },
+    {
+      "scenario": 7,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 2249,
+      "tokenUscita": 54,
+      "secondi": 10,
+      "scritture": 0
+    },
+    {
+      "scenario": 7,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 2249,
+      "tokenUscita": 54,
+      "secondi": 8,
+      "scritture": 0
+    },
+    {
+      "scenario": 7,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 2249,
+      "tokenUscita": 54,
+      "secondi": 9,
+      "scritture": 0
+    },
+    {
+      "scenario": 8,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4611,
+      "tokenUscita": 91,
+      "secondi": 25,
+      "scritture": 0
+    },
+    {
+      "scenario": 8,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4611,
+      "tokenUscita": 103,
+      "secondi": 23,
+      "scritture": 0
+    },
+    {
+      "scenario": 8,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4611,
+      "tokenUscita": 103,
+      "secondi": 24,
+      "scritture": 0
+    },
+    {
+      "scenario": 9,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 2258,
+      "tokenUscita": 48,
+      "secondi": 10,
+      "scritture": 0
+    },
+    {
+      "scenario": 9,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 2258,
+      "tokenUscita": 25,
+      "secondi": 4,
+      "scritture": 0
+    },
+    {
+      "scenario": 9,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 1,
+      "tokenIngresso": 2258,
+      "tokenUscita": 25,
+      "secondi": 4,
+      "scritture": 0
+    },
+    {
+      "scenario": 10,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4601,
+      "tokenUscita": 92,
+      "secondi": 22,
+      "scritture": 0
+    },
+    {
+      "scenario": 10,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4601,
+      "tokenUscita": 92,
+      "secondi": 22,
+      "scritture": 0
+    },
+    {
+      "scenario": 10,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4601,
+      "tokenUscita": 92,
+      "secondi": 20,
+      "scritture": 0
+    },
+    {
+      "scenario": 11,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 4,
+      "tokenIngresso": 10169,
+      "tokenUscita": 177,
+      "secondi": 77,
+      "scritture": 2
+    },
+    {
+      "scenario": 11,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 4,
+      "tokenIngresso": 10169,
+      "tokenUscita": 176,
+      "secondi": 67,
+      "scritture": 2
+    },
+    {
+      "scenario": 11,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 4,
+      "tokenIngresso": 10169,
+      "tokenUscita": 176,
+      "secondi": 64,
+      "scritture": 2
+    },
+    {
+      "scenario": 12,
+      "ripetizione": 1,
+      "motivo": "server_non_disponibile",
+      "giri": 0,
+      "tokenIngresso": 0,
+      "tokenUscita": 0,
+      "secondi": 0,
+      "scritture": 0
+    },
+    {
+      "scenario": 12,
+      "ripetizione": 2,
+      "motivo": "server_non_disponibile",
+      "giri": 0,
+      "tokenIngresso": 0,
+      "tokenUscita": 0,
+      "secondi": 0,
+      "scritture": 0
+    },
+    {
+      "scenario": 12,
+      "ripetizione": 3,
+      "motivo": "server_non_disponibile",
+      "giri": 0,
+      "tokenIngresso": 0,
+      "tokenUscita": 0,
+      "secondi": 0,
+      "scritture": 0
+    },
+    {
+      "scenario": 13,
+      "ripetizione": 1,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4659,
+      "tokenUscita": 108,
+      "secondi": 26,
+      "scritture": 0
+    },
+    {
+      "scenario": 13,
+      "ripetizione": 2,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4659,
+      "tokenUscita": 108,
+      "secondi": 24,
+      "scritture": 0
+    },
+    {
+      "scenario": 13,
+      "ripetizione": 3,
+      "motivo": "risposta_finale",
+      "giri": 2,
+      "tokenIngresso": 4659,
+      "tokenUscita": 108,
+      "secondi": 26,
+      "scritture": 0
+    },
+    {
+      "scenario": 14,
+      "ripetizione": 1,
+      "motivo": "risposta_finale / risposta_finale",
+      "giri": 4,
+      "tokenIngresso": 9549,
+      "tokenUscita": 179,
+      "secondi": 45,
+      "scritture": 1
+    },
+    {
+      "scenario": 14,
+      "ripetizione": 2,
+      "motivo": "risposta_finale / risposta_finale",
+      "giri": 4,
+      "tokenIngresso": 9549,
+      "tokenUscita": 179,
+      "secondi": 43,
+      "scritture": 1
+    },
+    {
+      "scenario": 14,
+      "ripetizione": 3,
+      "motivo": "risposta_finale / risposta_finale",
+      "giri": 4,
+      "tokenIngresso": 9549,
+      "tokenUscita": 179,
+      "secondi": 45,
+      "scritture": 1
+    }
+  ]
+}
