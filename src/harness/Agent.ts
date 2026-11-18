@@ -41,6 +41,10 @@ export class Agent {
     // Somma dei token di tutti i giri: serve per la stima dei costi.
     const tokenTotali: UsoToken = { ingresso: 0, uscita: 0 };
 
+    // Le scritture davvero eseguite in questa richiesta. Le registra
+    // eseguiChiamata: è l'harness a saperlo con certezza, non il modello.
+    const scritture: ChiamataTool[] = [];
+
     // I tool disponibili si chiedono al server: il modello può usare solo questi.
     // Se il server non risponde, il modello non viene interrogato: senza i dati
     // potrebbe solo inventare.
@@ -56,6 +60,7 @@ export class Agent {
         motivo: "server_non_disponibile",
         iterazioni: 0,
         token: tokenTotali,
+        scritture,
       });
     }
 
@@ -93,6 +98,7 @@ export class Agent {
             motivo: "risposta_finale",
             iterazioni: iterazione,
             token: tokenTotali,
+            scritture,
           });
         }
 
@@ -105,7 +111,7 @@ export class Agent {
         // messaggio "tool": il modello lo legge al prossimo giro.
         for (const chiamata of risposta.chiamate) {
           const { nome } = chiamata;
-          const esitoTool = await this.eseguiChiamata(chiamata, tools);
+          const esitoTool = await this.eseguiChiamata(chiamata, tools, scritture);
           messaggi.push({ ruolo: "tool", nomeTool: nome, testo: esitoTool });
         }
       }
@@ -118,6 +124,7 @@ export class Agent {
         motivo: "errore",
         iterazioni: iterazione,
         token: tokenTotali,
+        scritture,
       });
     }
 
@@ -131,6 +138,7 @@ export class Agent {
       motivo: "max_iterazioni",
       iterazioni: this.maxIterazioni,
       token: tokenTotali,
+      scritture,
     });
   }
 
@@ -145,7 +153,7 @@ export class Agent {
   // modello: il risultato del tool, oppure il motivo per cui non è stato
   // eseguito. Gli errori che il modello può correggere da solo non diventano
   // eccezioni: tornano come testo, così il modello li legge e riprova.
-  private async eseguiChiamata(chiamata: ChiamataTool, tools: SpecTool[]): Promise<string> {
+  private async eseguiChiamata(chiamata: ChiamataTool, tools: SpecTool[], scritture: ChiamataTool[]): Promise<string> {
     // Il tool chiesto deve essere tra quelli esposti dal server: un modello può
     // inventarsi un nome.
     const tool: SpecTool | undefined = tools.find((t) => t.nome === chiamata.nome);
@@ -179,6 +187,12 @@ export class Agent {
       ...esito,
       durataMs: Date.now() - inizio,
     });
+
+    // Una scrittura confermata e andata a buon fine entra nell'elenco: è la
+    // prova di che cosa è cambiato davvero nel database.
+    if (!tool.soloLettura && !esito.errore) {
+      scritture.push(chiamata);
+    }
     return esito.testo;
   }
 }

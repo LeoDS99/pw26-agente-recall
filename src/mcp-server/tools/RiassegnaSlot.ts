@@ -31,7 +31,9 @@ export class RiassegnaSlot extends RecallTool<typeof schemaInput, typeof schemaO
     "Prenota uno slot libero per una richiesta in lista d'attesa: crea la prenotazione, già " +
     "confermata, e toglie la richiesta dalla lista. Funziona solo se lo slot è libero e la " +
     "richiesta è in attesa per la stessa prestazione dello slot: altrimenti risponde con il " +
-    "motivo del rifiuto, che va riferito all'operatore senza cercare di aggirarlo. MODIFICA i dati.";
+    "motivo del rifiuto, che va riferito all'operatore senza cercare di aggirarlo. Se l'operatore " +
+    "non indica la richiesta (per esempio «il primo candidato»), chiama prima proponi_candidati e usa " +
+    "il richiestaId che restituisce. MODIFICA i dati.";
   readonly schemaInput = schemaInput;
   readonly schemaOutput = schemaOutput;
   readonly soloLettura = false;

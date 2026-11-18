@@ -21,7 +21,7 @@ Il server MCP `recall-collemare` (`src/mcp-server`) espone sei tool sopra il bac
 - **Errori:** in tutti i casi il tool risponde con `isError: true` e un messaggio, e il server resta in funzione.
   - *Errore di validazione:* un parametro non rispetta lo schema. Il messaggio comincia con `Input validation error`.
   - *Errore di dominio:* la richiesta viola una regola del processo. Il messaggio spiega il motivo.
-  - *Errore tecnico:* per esempio il database non è raggiungibile. Il messaggio è generico (`Errore tecnico: dati non disponibili in questo momento.`) e il dettaglio va solo nel log del server.
+  - *Errore tecnico:* per esempio il database non è raggiungibile. Il messaggio è generico (`Errore tecnico: dati non disponibili in questo momento. Il problema non dipende dalla richiesta: riprovare più tardi.`) e il dettaglio va solo nel log del server.
 
 ## Come provare un tool
 
@@ -83,32 +83,32 @@ Risultato (`structuredContent`):
   "appuntamenti": [
     {
       "prenotazioneId": 12,
-      "paziente": "Luca Greco",
-      "telefono": "+39 000 0000012",
+      "paziente": "Chiara Bianchi",
+      "telefono": "+39 000 0236953",
       "prestazione": "Visita cardiologica",
       "sede": "Collemare Costa",
       "inizio": "2026-11-18 11:00"
     },
     {
       "prenotazioneId": 14,
-      "paziente": "Andrea Bianchi",
-      "telefono": "+39 000 0000014",
+      "paziente": "Andrea Marino",
+      "telefono": "+39 000 7563332",
       "prestazione": "Visita oculistica",
       "sede": "Collemare Costa",
       "inizio": "2026-11-18 11:00"
     },
     {
       "prenotazioneId": 16,
-      "paziente": "Matteo Colombo",
-      "telefono": "+39 000 0000016",
+      "paziente": "Francesca Gallo",
+      "telefono": "+39 000 9417034",
       "prestazione": "Visita dermatologica",
       "sede": "Collemare Costa",
       "inizio": "2026-11-18 11:00"
     },
     {
       "prenotazioneId": 18,
-      "paziente": "Paolo Marino",
-      "telefono": "+39 000 0000018",
+      "paziente": "Paolo Greco",
+      "telefono": "+39 000 6859650",
       "prestazione": "Ecografia addome completo",
       "sede": "Collemare Costa",
       "inizio": "2026-11-18 11:00"
@@ -123,7 +123,7 @@ Risultato (`structuredContent`):
 - **Casi d'uso:** UC4
 - **Scenari di test:** 3, 8, 9
 
-**Descrizione** (il testo che riceve il modello): Elenca gli slot ancora liberi (senza prenotazioni attive) tra due date, con filtri facoltativi per prestazione e sede. Restituisce solo slot futuri. Non modifica i dati.
+**Descrizione** (il testo che riceve il modello): Elenca gli slot ancora liberi (senza prenotazioni attive) tra due date, con filtri facoltativi per prestazione e sede. Restituisce solo slot futuri. Per sapere chi chiamare per riempire uno slot, usa poi proponi_candidati su ciascuno slot. Non modifica i dati.
 
 **Parametri di ingresso**
 
@@ -217,7 +217,7 @@ Esempio di errore, con i parametri:
 - **Casi d'uso:** UC3, UC4
 - **Scenari di test:** 3, 4, 5, 10, 11
 
-**Descrizione** (il testo che riceve il modello): Per uno slot libero, elenca i pazienti in lista d'attesa per la stessa prestazione, già nell'ordine in cui chiamarli: classe di priorità (U, B, D, P), poi data della richiesta, poi sede di riferimento. L'ordine è deciso dal sistema e non va cambiato. Non modifica i dati.
+**Descrizione** (il testo che riceve il modello): Per uno slot libero, elenca i pazienti in lista d'attesa per la stessa prestazione: è la lista di chi chiamare per riempirlo, già nell'ordine in cui chiamarli: classe di priorità (U, B, D, P), poi data della richiesta, poi sede di riferimento. L'ordine è deciso dal sistema e non va cambiato. Non modifica i dati.
 
 **Parametri di ingresso**
 
@@ -261,19 +261,19 @@ Risultato (`structuredContent`):
   "candidati": [
     {
       "richiestaId": 262,
-      "paziente": "Luca Colombo",
-      "telefono": "+39 000 0000002",
+      "paziente": "Francesca Marino",
+      "telefono": "+39 000 4426134",
       "classePriorita": "U",
       "dataRichiesta": "2026-11-12",
       "stessaSede": false
     },
     {
       "richiestaId": 263,
-      "paziente": "Luca Greco",
-      "telefono": "+39 000 0000012",
+      "paziente": "Giulia Ricci",
+      "telefono": "+39 000 2752217",
       "classePriorita": "B",
       "dataRichiesta": "2026-10-28",
-      "stessaSede": true
+      "stessaSede": false
     }
   ]
 }
@@ -362,7 +362,7 @@ Risultato (`structuredContent`):
 - **Casi d'uso:** UC1, UC2
 - **Scenari di test:** 2, 11
 
-**Descrizione** (il testo che riceve il modello): Registra l'esito di una telefonata su una prenotazione e ne aggiorna lo stato. confermato: la prenotazione diventa confermata. disdetto: la prenotazione viene disdetta e lo slot torna libero (slotLiberato = true, slotId = lo slot da riassegnare). non_raggiungibile: resta da confermare. MODIFICA i dati.
+**Descrizione** (il testo che riceve il modello): Registra l'esito di una telefonata su una prenotazione e ne aggiorna lo stato. Usalo ogni volta che l'operatore riferisce l'esito di un contatto con un paziente (conferma, disdetta o mancata risposta), anche quando è stato il paziente a chiamare. confermato: la prenotazione diventa confermata. disdetto: la prenotazione viene disdetta e lo slot torna libero (slotLiberato = true, slotId = lo slot che si è liberato: per trovargli un sostituto usa proponi_candidati con questo slotId). non_raggiungibile: resta da confermare. MODIFICA i dati.
 
 **Parametri di ingresso**
 
@@ -378,7 +378,7 @@ Risultato (`structuredContent`):
 | `prenotazioneId` | numero | Numero della prenotazione |
 | `esito` | uno tra: `confermato`, `disdetto`, `non_raggiungibile` | L'esito registrato |
 | `statoPrenotazione` | testo | Stato della prenotazione dopo la registrazione |
-| `slotLiberato` | vero o falso | true se lo slot è tornato libero e si può riassegnare |
+| `slotLiberato` | vero o falso | true se lo slot è tornato libero |
 | `slotId` | numero | Numero dello slot della prenotazione |
 
 **Effetti sui dati:** Aggiunge una riga a `contatti`. Con `confermato` la prenotazione passa a `confermata`. Con `disdetto` la prenotazione passa a `disdetta`, la richiesta a `annullata` e lo slot torna libero. Con `non_raggiungibile` lo stato non cambia. Tutto in una transazione.
@@ -428,7 +428,7 @@ Esempio di errore, ripetendo la stessa chiamata:
 - **Casi d'uso:** UC3
 - **Scenari di test:** 4, 5, 10, 11
 
-**Descrizione** (il testo che riceve il modello): Prenota uno slot libero per una richiesta in lista d'attesa: crea la prenotazione, già confermata, e toglie la richiesta dalla lista. Funziona solo se lo slot è libero e la richiesta è in attesa per la stessa prestazione dello slot: altrimenti risponde con il motivo del rifiuto, che va riferito all'operatore senza cercare di aggirarlo. MODIFICA i dati.
+**Descrizione** (il testo che riceve il modello): Prenota uno slot libero per una richiesta in lista d'attesa: crea la prenotazione, già confermata, e toglie la richiesta dalla lista. Funziona solo se lo slot è libero e la richiesta è in attesa per la stessa prestazione dello slot: altrimenti risponde con il motivo del rifiuto, che va riferito all'operatore senza cercare di aggirarlo. Se l'operatore non indica la richiesta (per esempio «il primo candidato»), chiama prima proponi_candidati e usa il richiestaId che restituisce. MODIFICA i dati.
 
 **Parametri di ingresso**
 
@@ -470,7 +470,7 @@ Risultato (`structuredContent`):
   "prenotazioneId": 261,
   "slotId": 812,
   "richiestaId": 262,
-  "paziente": "Luca Colombo",
+  "paziente": "Francesca Marino",
   "inizio": "2026-11-27 12:30",
   "stato": "confermata"
 }

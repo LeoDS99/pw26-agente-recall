@@ -43,10 +43,18 @@ export class RecallMcpServer {
             return { content: [{ type: "text", text: errore.message }], isError: true };
           }
           // Qualsiasi altro errore (es. database spento): dettaglio su stderr per
-          // noi, messaggio generico al modello. Il server non si ferma.
+          // noi, messaggio generico al modello. Il messaggio dice anche che il
+          // problema non dipende dalla richiesta: senza, il modello suggeriva
+          // all'operatore cause sbagliate (prova generale degli scenari, 17/11).
+          // Il server non si ferma.
           console.error(`[${tool.nome}]`, errore);
           return {
-            content: [{ type: "text", text: "Errore tecnico: dati non disponibili in questo momento." }],
+            content: [
+              {
+                type: "text",
+                text: "Errore tecnico: dati non disponibili in questo momento. Il problema non dipende dalla richiesta: riprovare più tardi.",
+              },
+            ],
             isError: true,
           };
         }

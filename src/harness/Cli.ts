@@ -41,6 +41,10 @@ export class Cli implements ConfermaUtente {
       console.log(
         `(motivo: ${esito.motivo}, giri: ${esito.iterazioni}, token: ingresso ${esito.token.ingresso}, uscita ${esito.token.uscita})`,
       );
+      // Le scritture eseguite le dice l'harness, non il modello: se il modello
+      // annuncia una modifica che non c'è, qui l'operatore lo vede.
+      const scritte = esito.scritture.map((c) => `${c.nome} ${JSON.stringify(c.argomenti)}`);
+      console.log(`(scritture eseguite: ${scritte.length === 0 ? "nessuna" : scritte.join("; ")})`);
     }
   }
 

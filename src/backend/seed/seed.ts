@@ -4,7 +4,8 @@
 //
 // Il seed ha due parti:
 //  1. DATI DI BASE: sedi, prestazioni, pazienti, agenda e prenotazioni,
-//     generati da regole fisse (niente valori casuali).
+//     generati da regole fisse e da un generatore pseudo-casuale con un seme
+//     fisso (parte 3): sembrano mescolati, ma sono gli stessi a ogni lancio.
 //  2. DATI FISSI DEGLI SCENARI DI TEST, segnati con "DATO FISSO": sempre gli
 //     stessi numeri (slot 812, prenotazione 5531, richiesta 4410) e le stesse
 //     condizioni, così ogni scenario ha un esito atteso scritto in anticipo.
@@ -66,11 +67,46 @@ const COGNOMI = ["Bianchi", "Romano", "Colombo", "Ricci", "Marino", "Greco", "Ga
 // Qui sono assegnate a rotazione: ogni 10 prenotazioni, 1 U, 2 B, 3 D, 4 P.
 const CLASSI = ["P", "D", "B", "P", "D", "P", "B", "D", "P", "U"];
 
-const NUM_PAZIENTI = 60; // 10 nomi e 7 cognomi: combinazioni tutte diverse fino a 70
+const NUM_PAZIENTI = 60; // il paziente 1 (Maria Rossi) più 59 combinazioni diverse delle 70 possibili
 const GIORNI_AGENDA = 14; // l'agenda va da domani a tra 14 giorni
 const ORARI = ["09:00", "11:00"]; // due slot al giorno per ogni prestazione in ogni sede
 
 // --- 3. UTILITÀ ----------------------------------------------------------------
+
+// Generatore pseudo-casuale con seme fisso (algoritmo mulberry32): ogni chiamata
+// restituisce un numero tra 0 e 1 che sembra casuale, ma la sequenza è sempre la
+// stessa, quindi ogni lancio del seed produce gli stessi dati. Serve a mescolare
+// nomi, telefoni e pazienti senza che si leghino tra loro: con il solo resto della
+// divisione, i dati che dipendevano dallo stesso numero si ripetevano insieme
+// (per esempio tutti i candidati di una prestazione con lo stesso nome).
+const SEME = 2611; // numero qualsiasi: cambiandolo cambiano i dati, ma restano ripetibili
+let statoCasuale = SEME;
+function casuale(): number {
+  statoCasuale = (statoCasuale + 0x6d2b79f5) | 0;
+  let t = statoCasuale;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
+// orarioCasuale(): un orario d'ufficio tra le 8:00 e le 17:55, a passi di 5
+// minuti, es. "14:35". Serve perché prenotazioni e telefonate non risultino
+// tutte fatte alla stessa ora.
+function orarioCasuale(): string {
+  const minuti = 8 * 60 + Math.floor(casuale() * 120) * 5;
+  return `${String(Math.floor(minuti / 60)).padStart(2, "0")}:${String(minuti % 60).padStart(2, "0")}`;
+}
+
+// mescola(lista): restituisce una copia della lista in ordine mescolato
+// (algoritmo di Fisher-Yates), usando il generatore qui sopra.
+function mescola<T>(lista: T[]): T[] {
+  const copia = [...lista];
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(casuale() * (i + 1));
+    [copia[i], copia[j]] = [copia[j]!, copia[i]!];
+  }
+  return copia;
+}
 
 // inserisci(c, sql, valori): esegue un INSERT e restituisce l'id della riga
 // appena creata (lo chiede a PostgreSQL con "RETURNING id"). Serve quando una
@@ -121,21 +157,27 @@ async function seed(c: PoolClient): Promise<void> {
 
   // b. PAZIENTI: 60, con l'id assegnato dal database.
   // Il paziente 1 è sempre Maria Rossi (DATO FISSO, scenario 10: richiesta 4410).
-  // Gli altri: il resto della divisione per 10 sceglie il nome, quello per 7 il
-  // cognome. 10 e 7 non hanno divisori in comune, quindi fino a 70 pazienti non
-  // ci sono omonimi, e due pazienti vicini non hanno mai lo stesso cognome.
-  // Il telefono ha un prefisso inesistente (+39 000).
+  // Gli altri: tutte le 70 combinazioni di nome e cognome, mescolate, e se ne
+  // prendono 59: niente omonimi e nessun legame tra il numero del paziente e il
+  // suo nome. Il telefono ha un prefisso inesistente (+39 000) e 7 cifre a caso,
+  // tutte diverse: non coincide più con il numero del paziente.
   // La sede di riferimento ruota tra 1, 2 e 3: 20 pazienti per sede.
   // L'array "pazienti" tiene gli id creati: pazienti[0] è Maria Rossi.
+  const combinazioni = mescola(NOMI.flatMap((nome) => COGNOMI.map((cognome) => ({ nome, cognome }))));
+  const telefoniUsati = new Set<string>();
   const pazienti: number[] = [];
   for (let i = 1; i <= NUM_PAZIENTI; i++) {
-    const nome = i === 1 ? "Maria" : NOMI[i % 10];
-    const cognome = i === 1 ? "Rossi" : COGNOMI[i % 7];
+    const { nome, cognome } = i === 1 ? { nome: "Maria", cognome: "Rossi" } : combinazioni[i - 2]!;
+    let telefono: string;
+    do {
+      telefono = `+39 000 ${String(Math.floor(casuale() * 10_000_000)).padStart(7, "0")}`;
+    } while (telefoniUsati.has(telefono));
+    telefoniUsati.add(telefono);
     pazienti.push(
       await inserisci(
         c,
         "INSERT INTO pazienti (nome, cognome, telefono, sede_riferimento_id) VALUES ($1, $2, $3, $4)",
-        [nome, cognome, `+39 000 ${String(i).padStart(7, "0")}`, (i % 3) + 1],
+        [nome, cognome, telefono, (i % 3) + 1],
       ),
     );
   }
@@ -192,7 +234,16 @@ async function seed(c: PoolClient): Promise<void> {
 
   // f. PRENOTAZIONI: per ogni slot dell'agenda decide se resta libero o viene
   // prenotato. "i" è la posizione dello slot nell'array: con il resto della
-  // divisione (%) fa ruotare classi, date e pazienti senza valori casuali.
+  // divisione (%) fa ruotare classi, date e pazienti.
+  // Il paziente ruota sui 59 pazienti dal 2 al 60 (Maria Rossi resta fuori).
+  // 59 è primo, quindi non ha divisori in comune con le rotazioni di classe (10),
+  // anzianità (4) e conferma (2): lo stesso paziente ha prenotazioni con classi e
+  // stati diversi, invece di avere sempre la stessa classe. Slot vicini (stesso
+  // giorno e ora) vanno sempre a pazienti diversi.
+  // "prenotate" ricorda quali prestazioni ha già prenotato ogni paziente: serve
+  // al passo h, per non mettere in lista d'attesa chi è già prenotato.
+  const prenotate = new Set<string>();
+  const pazienteDelloSlot = (i: number): number => pazienti[1 + (i % (NUM_PAZIENTI - 1))]!;
   // Risultato: nei prossimi 7 giorni tutto occupato tranne i 4 slot del Centro;
   // dal giorno 8 in poi uno slot su sei resta libero.
   for (const [i, s] of slot.entries()) {
@@ -232,31 +283,36 @@ async function seed(c: PoolClient): Promise<void> {
       c,
       `INSERT INTO richieste (paziente_id, prestazione_id, classe_priorita, data_richiesta, stato)
        VALUES ($1, $2, $3, $4, 'prenotata')`,
-      [pazienti[i % NUM_PAZIENTI], s.prestazione, classe, data(giorno(-giorniPassati))],
+      [pazienteDelloSlot(i), s.prestazione, classe, data(giorno(-giorniPassati))],
     );
+    prenotate.add(`${pazienteDelloSlot(i)}-${s.prestazione}`);
     const prenotazione = await inserisci(
       c,
       `INSERT INTO prenotazioni (slot_id, richiesta_id, stato, creata_il) VALUES ($1, $2, $3, $4)`,
-      [s.id, richiesta, confermata ? "confermata" : "da_confermare", dataOra(giorno(-giorniPassati), "10:00")],
+      [s.id, richiesta, confermata ? "confermata" : "da_confermare", dataOra(giorno(-giorniPassati), orarioCasuale())],
     );
 
-    // Una prenotazione confermata ha anche la telefonata che l'ha confermata (ieri alle 16).
+    // Una prenotazione confermata ha anche la telefonata che l'ha confermata (ieri, in orario d'ufficio).
     if (confermata) {
       await c.query("INSERT INTO contatti (prenotazione_id, esito, registrato_il) VALUES ($1, 'confermato', $2)", [
         prenotazione,
-        dataOra(giorno(-1), "16:00"),
+        dataOra(giorno(-1), orarioCasuale()),
       ]);
     }
   }
 
   // g. DATO FISSO (scenari 2, 11): prenotazione 5531, oculistica a Costa, da
-  // confermare. Richiesta in classe D di 20 giorni fa, paziente numero 5.
+  // confermare. Richiesta in classe D di 20 giorni fa. Il paziente è quello che
+  // la rotazione del passo f avrebbe messo in questo slot: così non ha altre
+  // prenotazioni alla stessa ora.
+  const paziente5531 = pazienteDelloSlot(slot.indexOf(s5531));
   const richiesta5531 = await inserisci(
     c,
     `INSERT INTO richieste (paziente_id, prestazione_id, classe_priorita, data_richiesta, stato)
      VALUES ($1, $2, 'D', $3, 'prenotata')`,
-    [pazienti[4], OCULISTICA, data(giorno(-20))],
+    [paziente5531, OCULISTICA, data(giorno(-20))],
   );
+  prenotate.add(`${paziente5531}-${OCULISTICA}`);
   await c.query(
     `INSERT INTO prenotazioni (id, slot_id, richiesta_id, stato, creata_il)
      VALUES (5531, $1, $2, 'da_confermare', $3)`,
@@ -267,13 +323,21 @@ async function seed(c: PoolClient): Promise<void> {
   // 6 richieste non ancora prenotate, con classi diverse (U, B, D, P, D, P) e
   // date sempre più vecchie (5, 20, 35, 50, 65, 80 giorni fa). Sono i candidati
   // per lo slot 812 e per sostituire la 5531: l'ordinamento si può verificare.
+  // I 6 pazienti di ogni prestazione si scelgono da un ordine mescolato, saltando
+  // chi ha già prenotato quella prestazione e chi è già in lista: in una lista
+  // d'attesa vera nessuno aspetta una visita che ha già in agenda.
   const CLASSI_ATTESA = ["U", "B", "D", "P", "D", "P"];
+  const giaInLista = new Set<number>();
   for (const p of PRESTAZIONI) {
-    for (let k = 0; k < CLASSI_ATTESA.length; k++) {
+    const scelti = mescola(pazienti.slice(1))
+      .filter((id) => !giaInLista.has(id) && !prenotate.has(`${id}-${p.id}`))
+      .slice(0, CLASSI_ATTESA.length);
+    for (const [k, paziente] of scelti.entries()) {
+      giaInLista.add(paziente);
       await c.query(
         `INSERT INTO richieste (paziente_id, prestazione_id, classe_priorita, data_richiesta, stato)
          VALUES ($1, $2, $3, $4, 'in_attesa')`,
-        [pazienti[k * 10 + p.id], p.id, CLASSI_ATTESA[k], data(giorno(-(5 + k * 15)))],
+        [paziente, p.id, CLASSI_ATTESA[k], data(giorno(-(5 + k * 15)))],
       );
     }
   }
