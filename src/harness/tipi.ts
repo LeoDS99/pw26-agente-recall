@@ -58,7 +58,7 @@ export type MotivoArresto =
 // chiede di registrare: richieste al modello, tool invocati, parametri,
 // risultati, token consumati.
 export type EventoLog =
-  | { tipo: "inizio"; richiesta: string; modello: string }
+  | { tipo: "inizio"; richiesta: string; modello: string; scambiInMemoria: number }
   | { tipo: "richiesta_modello"; iterazione: number; messaggi: number }
   | {
       tipo: "risposta_modello";

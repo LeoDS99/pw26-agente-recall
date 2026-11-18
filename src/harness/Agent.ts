@@ -2,6 +2,8 @@
 // Riceve una richiesta dell'operatore e la porta a termine: interroga il
 // modello, esegue i tool che il modello chiede, gli restituisce i risultati e
 // ripete, finché il modello risponde senza chiedere altri tool.
+// Ricorda gli ultimi scambi della sessione (richieste e risposte finali), così
+// l'operatore può rispondere a una domanda dell'agente o continuare un discorso.
 
 import type { ConfermaUtente } from "./ConfermaUtente.ts";
 import type { JsonlLogger } from "./JsonlLogger.ts";
@@ -16,6 +18,10 @@ export class Agent {
   private readonly log: JsonlLogger; // il log strutturato di ogni passo
   private readonly promptDiSistema: string; // le istruzioni fisse per il modello
   private readonly maxIterazioni: number; // numero massimo di giri del ciclo
+  private readonly maxScambi: number; // quanti scambi con l'operatore ricordare
+  // La memoria della sessione: le richieste dell'operatore e le risposte finali
+  // del modello, senza le chiamate ai tool. Vive solo in RAM: all'uscita sparisce.
+  private storia: Messaggio[] = [];
 
   constructor(
     modello: ModelProvider,
@@ -24,6 +30,7 @@ export class Agent {
     log: JsonlLogger,
     promptDiSistema: string,
     maxIterazioni = 12,
+    maxScambi = 5,
   ) {
     this.modello = modello;
     this.mcp = mcp;
@@ -31,12 +38,18 @@ export class Agent {
     this.log = log;
     this.promptDiSistema = promptDiSistema;
     this.maxIterazioni = maxIterazioni;
+    this.maxScambi = maxScambi;
   }
 
   // Esegue una richiesta dell'operatore e restituisce l'esito: la risposta,
   // il motivo per cui il ciclo si è fermato, i giri fatti e i token consumati.
   async esegui(richiesta: string): Promise<EsitoAgente> {
-    this.log.registra({ tipo: "inizio", richiesta, modello: this.modello.nome });
+    this.log.registra({
+      tipo: "inizio",
+      richiesta,
+      modello: this.modello.nome,
+      scambiInMemoria: this.storia.length / 2,
+    });
 
     // Somma dei token di tutti i giri: serve per la stima dei costi.
     const tokenTotali: UsoToken = { ingresso: 0, uscita: 0 };
@@ -64,12 +77,13 @@ export class Agent {
       });
     }
 
-    // La conversazione parte con due messaggi: le istruzioni (sistema) e la
-    // richiesta dell'operatore (utente). Il modello non ha memoria: a ogni giro
-    // riceve tutta la lista, che cresce con le sue risposte e con i risultati
-    // dei tool.
+    // La conversazione parte dalle istruzioni (sistema), poi gli scambi
+    // precedenti della sessione (la memoria), poi la richiesta dell'operatore
+    // (utente). Il modello da solo non ricorda niente: a ogni giro riceve tutta
+    // la lista, che cresce con le sue risposte e con i risultati dei tool.
     const messaggi: Messaggio[] = [
       { ruolo: "sistema", testo: this.promptDiSistema },
+      ...this.storia,
       { ruolo: "utente", testo: richiesta },
     ];
 
@@ -93,6 +107,7 @@ export class Agent {
         // Condizione di arresto: se il modello non chiede tool, il suo testo è la
         // risposta finale per l'operatore.
         if (risposta.chiamate.length === 0) {
+          this.ricorda(richiesta, risposta.testo);
           return this.concludi({
             risposta: risposta.testo,
             motivo: "risposta_finale",
@@ -117,6 +132,7 @@ export class Agent {
       }
     } catch (errore) {
       this.log.registra({ tipo: "errore", messaggio: testoErrore(errore) });
+      this.azzeraMemoria();
       return this.concludi({
         risposta:
           "Si è verificato un errore durante l'esecuzione della richiesta. " +
@@ -130,6 +146,7 @@ export class Agent {
 
     // Limite di giri raggiunto senza una risposta finale. Il messaggio dice che
     // cosa è successo e avvisa che qualche scrittura potrebbe essere già avvenuta.
+    this.azzeraMemoria();
     return this.concludi({
       risposta:
         "Non sono riuscito a completare la richiesta entro il numero massimo di passaggi. " +
@@ -147,6 +164,20 @@ export class Agent {
   private concludi(esito: EsitoAgente): EsitoAgente {
     this.log.registra({ tipo: "fine", ...esito });
     return esito;
+  }
+
+  // Dimentica gli scambi precedenti: la prossima richiesta parte da zero.
+  // La usano la Cli (comando "nuova") e lo script degli scenari.
+  azzeraMemoria(): void {
+    this.storia = [];
+  }
+
+  // Aggiunge alla memoria lo scambio appena concluso e tiene solo gli ultimi
+  // maxScambi. Ogni scambio sono due messaggi (richiesta e risposta), quindi
+  // si tengono gli ultimi 2 * maxScambi messaggi.
+  private ricorda(richiesta: string, risposta: string): void {
+    this.storia.push({ ruolo: "utente", testo: richiesta }, { ruolo: "modello", testo: risposta, chiamate: [] });
+    this.storia = this.storia.slice(-2 * this.maxScambi);
   }
 
   // Esegue una chiamata chiesta dal modello e restituisce il testo da ridare al

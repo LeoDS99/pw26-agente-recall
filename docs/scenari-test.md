@@ -15,10 +15,11 @@
 | 11 | "Il 5531 ha disdetto: trova un sostituto e prenotalo" | Più passi, con conferma prima di ogni scrittura | multi-passo (con scritture) | UC2 + UC3 |
 | 12 | Harness avviato con il comando del server MCP sbagliato, poi "Quali appuntamenti di domani a Collemare Costa non sono ancora confermati?" | All'avvio segnala che il server non è raggiungibile e lo registra nel log; alla richiesta risponde che i dati non sono disponibili, senza interrogare il modello e senza inventare dati | anomalo: tool non disponibile | UC1 |
 | 13 | "Quante visite cardiologiche in classe B prenotate nei prossimi 30 giorni sono fuori soglia?" | Usa `verifica_tempi_attesa` | normale | UC5 |
+| 14 | "Riassegna lo slot", poi, dopo la domanda dell'agente, "Lo slot 812, al primo candidato" | Alla prima richiesta chiede i dati mancanti, come nello scenario 6; alla seconda usa la richiesta precedente: propone i candidati dello slot 812, chiede conferma e riassegna lo slot al primo | multi-richiesta (memoria della sessione) | UC3 |
 
 ## Dati fissi da creare nel database
 - prenotazione 5531, da confermare, con almeno due richieste in attesa per la stessa prestazione (scenari 2 e 11)
-- slot 812: visita cardiologica a Collemare Centro, tra 10 giorni, libero, con almeno tre candidati in lista di classi diverse (scenari 4, 5, 10)
+- slot 812: visita cardiologica a Collemare Centro, tra 10 giorni, libero, con almeno tre candidati in lista di classi diverse (scenari 4, 5, 10, 14)
 - richiesta 4410: paziente Rossi, visita dermatologica, in attesa (scenario 10)
 - domani a Collemare Costa: almeno due appuntamenti da confermare (scenario 1)
 - nei prossimi sette giorni a Collemare Centro: tre o quattro slot liberi (scenario 3)
@@ -27,4 +28,5 @@
 ## Regole
 - Le date dei dati fissi si calcolano rispetto al giorno in cui si popola il database.
 - Gli identificativi fissi (5531, 812, 4410) si inseriscono esplicitamente, con numeri più alti di tutti quelli assegnati in automatico: così non entrano mai in conflitto e non serve riallineare le sequenze.
-- Il database si ripopola prima di ogni scenario: gli scenari 2, 4 e 11 modificano dati usati da altri.
+- Il database si ripopola prima di ogni scenario: gli scenari 2, 4, 11 e 14 modificano dati usati da altri.
+- Prima di ogni scenario si azzera anche la memoria dell'agente (comando `nuova`). Nello scenario 14 le due richieste si scrivono una dopo l'altra, senza azzerarla.
