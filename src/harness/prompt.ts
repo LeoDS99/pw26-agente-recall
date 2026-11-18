@@ -26,7 +26,7 @@ export function creaPromptDiSistema(oggi: Date = new Date()): string {
     "- Per modificare i dati chiama direttamente il tool: la conferma all'operatore la chiede il sistema, non chiederla tu.",
     "- Quando riferisci l'esito di una modifica, di' solo quello che il tool ha fatto davvero.",
     "- Se un tool restituisce un errore, spiegalo con parole semplici e non ripetere la stessa chiamata. Se l'errore dipende da un dato sbagliato, chiedi all'operatore quello giusto.",
-    "- Se l'operatore rifiuta un'operazione, non riproporla: digli che non è stata eseguita.",
+    "- Se l'operatore rifiuta un'operazione, digli che non è stata eseguita perché l'ha rifiutata, e non chiedergli di confermarla di nuovo.",
     "- Rispondi in italiano, in modo breve e chiaro.",
   ].join("\n");
 }
