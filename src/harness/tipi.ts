@@ -47,7 +47,7 @@ export interface RispostaModello {
   durataMs: number; // tempo della chiamata al modello, in millisecondi
 }
 
-// Perché il ciclo dell'agente si è fermato (05, "Regole di comportamento").
+// Perché il ciclo dell'agente si è fermato.
 export type MotivoArresto =
   | "risposta_finale" // il modello ha risposto senza chiedere tool
   | "max_iterazioni" // raggiunto il numero massimo di giri

@@ -1,6 +1,6 @@
 // Tipi di dato del back-end: i valori ammessi e la forma dei risultati
 // del RecallRepository. Solo tipi, nessuna logica: li usano il repository,
-// SoglieAttesa e, in F3, i tool del server MCP.
+// SoglieAttesa e i tool del server MCP.
 
 // I valori ammessi, gli stessi dei CHECK in schema.sql.
 export type ClassePriorita = "U" | "B" | "D" | "P";

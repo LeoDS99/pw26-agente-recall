@@ -11,7 +11,7 @@ import { creaPromptDiSistema } from "./prompt.ts";
 // Modello e percorso del server si possono cambiare senza toccare il codice,
 // con le variabili d'ambiente MODELLO e SERVER_MCP (anche nel file .env).
 // SERVER_MCP serve per lo scenario 12: con un percorso sbagliato il server non parte.
-const MODELLO_PREDEFINITO = "qwen3:4b-instruct";
+const MODELLO_PREDEFINITO = "gemma4:26b";
 const SERVER_PREDEFINITO = "src/mcp-server/index.ts";
 
 // Un file di log per ogni avvio, in logs/.

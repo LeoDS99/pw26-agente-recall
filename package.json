@@ -13,6 +13,7 @@
     "db:seed": "tsx --env-file=.env src/backend/seed/seed.ts",
     "db:reset": "npm run db:schema && npm run db:seed",
     "agente": "tsx --env-file=.env src/harness/index.ts",
+    "scenari": "tsx --env-file=.env src/scenari/esegui.ts",
     "format": "prettier --write src",
     "format:check": "prettier --check src"
   },

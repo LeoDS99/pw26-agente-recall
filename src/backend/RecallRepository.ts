@@ -56,8 +56,8 @@ export class RecallRepository {
 
   // Slot liberi tra le date "dal" e "al" (comprese, formato "2026-11-12"),
   // solo futuri. Filtri facoltativi: prestazione e sede.
-  // Uno slot è libero se non ha prenotazioni attive (non disdette):
-  // lo slot non ha un campo di stato (scelta del 15/10, vedi 05).
+  // Uno slot è libero se non ha prenotazioni attive (non disdette). Lo slot
+  // non ha un campo di stato: così non può mai contraddire le prenotazioni.
   async slotLiberi(dal: string, al: string, prestazioneId?: number, sedeId?: number): Promise<SlotLibero[]> {
     const { rows } = await this.pool.query<SlotLibero>(
       `SELECT s.id AS "slotId",
