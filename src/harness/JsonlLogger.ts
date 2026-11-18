@@ -2,8 +2,8 @@
 // Ogni evento è una riga del file con un oggetto JSON, più l'ora in cui è
 // avvenuto. Si legge riga per riga, si filtra con qualunque strumento e se il
 // programma si interrompe le righe già scritte restano.
-// I file vanno nella cartella logs/, esclusa da git: gli estratti per la tesi
-// si copiano in una cartella versionata (05, sezione Stack).
+// I file vanno nella cartella logs/, esclusa da git: gli estratti mostrati
+// nella tesi si copiano in una cartella versionata dentro docs/.
 
 import { appendFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";

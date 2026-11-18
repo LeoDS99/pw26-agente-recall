@@ -23,7 +23,8 @@ verifica dei tempi d'attesa.
 
 - Node.js 22 o successivo
 - Docker Desktop (per il database PostgreSQL 18)
-- Ollama, con il modello `qwen3:4b-instruct` (per l'harness)
+- Ollama 0.30.9 o successivo, con il modello `gemma4:26b` (per l'harness: circa
+  17 GB da scaricare; provato su un PC con 32 GB di RAM, senza scheda video dedicata)
 - Git
 
 Per provare il server con MCP Inspector serve Node.js 22.23.4 o successivo
@@ -36,7 +37,7 @@ git clone https://github.com/LeoDS99/pw26-agente-recall.git
 cd pw26-agente-recall
 cp .env.example .env
 npm ci
-ollama pull qwen3:4b-instruct
+ollama pull gemma4:26b
 ```
 
 Il file `.env` contiene le credenziali del database locale. I valori di
@@ -131,7 +132,7 @@ il codice:
 
 | Variabile | Predefinito | A cosa serve |
 |---|---|---|
-| `MODELLO` | `qwen3:4b-instruct` | usare un altro modello di Ollama |
+| `MODELLO` | `gemma4:26b` | usare un altro modello di Ollama, per esempio `qwen3:4b-instruct` su un PC con meno memoria (con risposte meno affidabili) |
 | `SERVER_MCP` | `src/mcp-server/index.ts` | con un percorso sbagliato il server non parte: è lo scenario di test 12 |
 
 Si possono scrivere nel file `.env` oppure, solo per il terminale aperto, in
@@ -141,6 +142,39 @@ PowerShell:
 $env:SERVER_MCP = "src/non-esiste.ts"
 npm run agente
 Remove-Item Env:SERVER_MCP
+```
+
+### Scenari di test
+
+Lo script `src/scenari/esegui.ts` esegue in automatico i 13 scenari di
+`docs/scenari-test.md`, con l'agente e il modello veri. Con Docker Desktop e
+Ollama accesi:
+
+```
+npm run scenari
+```
+
+Prima di ogni scenario ricrea i dati con `db:reset`. Alle conferme risponde come
+previsto dallo scenario (no solo nello scenario 5), ferma e riavvia il database
+per lo scenario 8 e usa un percorso del server sbagliato per lo scenario 12.
+Alla fine stampa una tabella con motivo di arresto, giri, token, secondi e
+scritture eseguite di ogni esecuzione, e la salva in
+`logs/sessione-...-riepilogo.json`. Lo script non decide se uno scenario è
+superato: l'esito si valuta leggendo il log e confrontandolo con l'esito atteso.
+
+| Variabile | Predefinito | A cosa serve |
+|---|---|---|
+| `MODELLO` | `gemma4:26b` | il modello da usare |
+| `RIPETIZIONI` | `1` | quante volte eseguire ogni scenario |
+| `SCENARI` | tutti | solo alcuni scenari, per esempio `2,3,11` |
+
+Per esempio, in PowerShell, tre ripetizioni dello scenario 3:
+
+```
+$env:SCENARI = "3"
+$env:RIPETIZIONI = "3"
+npm run scenari
+Remove-Item Env:SCENARI, Env:RIPETIZIONI
 ```
 
 ## Dati sintetici
@@ -190,6 +224,8 @@ src/harness/
   ConfermaUtente.ts    interfaccia della conferma prima delle scritture
   JsonlLogger.ts       log in formato JSON Lines
   tipi.ts              tipi di dato
+src/scenari/
+  esegui.ts            esecuzione automatica degli scenari di test
 ```
 
 ## Comandi
@@ -202,6 +238,7 @@ src/harness/
 | `npm run db:seed` | inserisce i dati sintetici |
 | `npm run db:reset` | `db:schema` + `db:seed` |
 | `npm run agente` | avvia l'agente (riga di comando) |
+| `npm run scenari` | esegue gli scenari di test in automatico |
 | `npm run typecheck` | controlla i tipi TypeScript |
 | `npm run format` | formatta il codice con Prettier |
 | `npm run format:check` | controlla la formattazione senza modificare i file |

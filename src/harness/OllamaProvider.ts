@@ -37,6 +37,10 @@ export class OllamaProvider implements ModelProvider {
       messages: messaggi.map(versoOllama),
       tools: tools.map(toolPerOllama),
       stream: false,
+      // Niente ragionamento: alcuni modelli (per esempio Gemma 4) prima di
+      // rispondere "pensano" a lungo, e sul processore costa minuti a ogni
+      // giro. Sui modelli che non ragionano l'opzione non cambia niente.
+      think: false,
       // temperature 0: a parità di richiesta il modello sceglie sempre le stesse
       // parole, così gli scenari di test sono ripetibili.
       options: { num_ctx: this.contesto, temperature: 0 },

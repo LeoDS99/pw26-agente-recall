@@ -16,7 +16,7 @@ export const CARDIOLOGICA = 1,
   ECOGRAFIA = 4,
   RISONANZA = 5;
 
-// Le 3 sedi e le prestazioni che ognuna offre (tabella delle sedi in 05).
+// Le 3 sedi e le prestazioni che ognuna offre.
 // "prestazioni" non va nel database: serve al seed per costruire l'agenda,
 // cioè per sapere quali slot creare in ogni sede.
 export const SEDI = [

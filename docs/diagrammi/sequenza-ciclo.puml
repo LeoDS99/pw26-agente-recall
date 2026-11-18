@@ -12,6 +12,10 @@ database PostgreSQL as DB
 
 Operatore -> Cli : "Il paziente dell'appuntamento\n5531 ha disdetto"
 Cli -> Agent : esegui(richiesta)
+Agent -> McpToolClient : elencaTool()
+McpToolClient -> Server : tools/list
+Server --> McpToolClient : elenco dei tool
+McpToolClient --> Agent : SpecTool[]
 
 loop finché c'è una risposta finale o si arriva a maxIterazioni
   Agent -> Modello : chat(messaggi, tools)
@@ -37,9 +41,9 @@ loop finché c'è una risposta finale o si arriva a maxIterazioni
     DB --> Server : ok
     Server --> McpToolClient : risultato
     McpToolClient --> Agent : risultato
-    Agent -> Agent : aggiunge il risultato\nai messaggi
+    Agent -> Agent : aggiunge il risultato ai messaggi\n(e la scrittura alle scritture eseguite)
   else risposta finale, nessun tool
-    Agent --> Cli : EsitoAgente (RISPOSTA_FINALE)
+    Agent --> Cli : EsitoAgente (risposta_finale)
   end
 end
 

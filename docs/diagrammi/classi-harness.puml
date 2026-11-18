@@ -17,7 +17,7 @@ class Agent {
   - maxIterazioni : number
   - promptDiSistema : string
   + esegui(richiesta : string) : Promise<EsitoAgente>
-  - eseguiChiamata(chiamata : ChiamataTool, tools : SpecTool[]) : Promise<string>
+  - eseguiChiamata(chiamata : ChiamataTool, tools : SpecTool[], scritture : ChiamataTool[]) : Promise<string>
   - concludi(esito : EsitoAgente) : EsitoAgente
 }
 
