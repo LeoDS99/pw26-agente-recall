@@ -15,8 +15,12 @@ class Cli {
 
 class Agent {
   - maxIterazioni : number
+  - maxScambi : number
   - promptDiSistema : string
+  - storia : Messaggio[]
   + esegui(richiesta : string) : Promise<EsitoAgente>
+  + azzeraMemoria() : void
+  - ricorda(richiesta : string, risposta : string) : void
   - eseguiChiamata(chiamata : ChiamataTool, tools : SpecTool[], scritture : ChiamataTool[]) : Promise<string>
   - concludi(esito : EsitoAgente) : EsitoAgente
 }

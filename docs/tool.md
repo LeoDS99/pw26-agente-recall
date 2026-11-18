@@ -33,7 +33,7 @@ npx -y @modelcontextprotocol/inspector --cli --method tools/call --tool-name pro
 
 Per l'elenco dei tool con i loro schemi si usa `--method tools/list` al posto di `--method tools/call` e dei parametri del tool.
 
-Gli esempi di questo documento sono stati eseguiti l'11/11/2026 subito dopo `npm run db:reset`. Le date dei dati sintetici dipendono dal giorno in cui si lancia il comando; i numeri di slot, prenotazioni e richieste restano gli stessi.
+Gli esempi di questo documento sono stati eseguiti il 18/11/2026 subito dopo `npm run db:reset`. Le date dei dati sintetici dipendono dal giorno in cui si lancia il comando; i numeri di slot, prenotazioni e richieste restano gli stessi.
 
 ## appuntamenti_da_confermare
 
@@ -87,7 +87,7 @@ Risultato (`structuredContent`):
       "telefono": "+39 000 0236953",
       "prestazione": "Visita cardiologica",
       "sede": "Collemare Costa",
-      "inizio": "2026-11-18 11:00"
+      "inizio": "2026-11-19 11:00"
     },
     {
       "prenotazioneId": 14,
@@ -95,7 +95,7 @@ Risultato (`structuredContent`):
       "telefono": "+39 000 7563332",
       "prestazione": "Visita oculistica",
       "sede": "Collemare Costa",
-      "inizio": "2026-11-18 11:00"
+      "inizio": "2026-11-19 11:00"
     },
     {
       "prenotazioneId": 16,
@@ -103,7 +103,7 @@ Risultato (`structuredContent`):
       "telefono": "+39 000 9417034",
       "prestazione": "Visita dermatologica",
       "sede": "Collemare Costa",
-      "inizio": "2026-11-18 11:00"
+      "inizio": "2026-11-19 11:00"
     },
     {
       "prenotazioneId": 18,
@@ -111,7 +111,7 @@ Risultato (`structuredContent`):
       "telefono": "+39 000 6859650",
       "prestazione": "Ecografia addome completo",
       "sede": "Collemare Costa",
-      "inizio": "2026-11-18 11:00"
+      "inizio": "2026-11-19 11:00"
     }
   ]
 }
@@ -130,7 +130,7 @@ Risultato (`structuredContent`):
 | Parametro | Tipo | Obbligatorio | Descrizione |
 |---|---|---|---|
 | `dal` | data `AAAA-MM-GG` | sì | Primo giorno da cercare, formato AAAA-MM-GG |
-| `al` | data `AAAA-MM-GG` | no | Ultimo giorno compreso, formato AAAA-MM-GG (se manca: 30 giorni dopo "dal") |
+| `al` | data `AAAA-MM-GG` | sì | Ultimo giorno compreso, formato AAAA-MM-GG |
 | `prestazione` | uno tra: `Visita cardiologica`, `Visita oculistica`, `Visita dermatologica`, `Ecografia addome completo`, `Risonanza magnetica articolare` | no | Solo questa prestazione (se manca: tutte) |
 | `sede` | uno tra: `Collemare Centro`, `Collemare Costa`, `Collemare Valle` | no | Solo questa sede (se manca: tutte) |
 
@@ -150,6 +150,7 @@ Risultato (`structuredContent`):
 
 - Data inesistente o in un formato diverso da AAAA-MM-GG: errore di validazione (scenario 9).
 - Prestazione o sede non in elenco: errore di validazione, con l'elenco dei valori ammessi.
+- Data finale mancante: errore di validazione (la data finale è obbligatoria).
 - Data finale precedente a quella iniziale: errore di dominio.
 
 **Esempio di invocazione**
@@ -157,7 +158,7 @@ Risultato (`structuredContent`):
 Parametri:
 
 ```json
-{"dal": "2026-11-18", "al": "2026-11-24", "sede": "Collemare Centro"}
+{"dal": "2026-11-19", "al": "2026-11-25", "sede": "Collemare Centro"}
 ```
 
 Risultato (`structuredContent`):
@@ -169,25 +170,25 @@ Risultato (`structuredContent`):
       "slotId": 127,
       "prestazione": "Ecografia addome completo",
       "sede": "Collemare Centro",
-      "inizio": "2026-11-24 09:00"
+      "inizio": "2026-11-25 09:00"
     },
     {
       "slotId": 129,
       "prestazione": "Risonanza magnetica articolare",
       "sede": "Collemare Centro",
-      "inizio": "2026-11-24 09:00"
+      "inizio": "2026-11-25 09:00"
     },
     {
       "slotId": 128,
       "prestazione": "Ecografia addome completo",
       "sede": "Collemare Centro",
-      "inizio": "2026-11-24 11:00"
+      "inizio": "2026-11-25 11:00"
     },
     {
       "slotId": 130,
       "prestazione": "Risonanza magnetica articolare",
       "sede": "Collemare Centro",
-      "inizio": "2026-11-24 11:00"
+      "inizio": "2026-11-25 11:00"
     }
   ]
 }
@@ -196,7 +197,7 @@ Risultato (`structuredContent`):
 Esempio di errore, con i parametri:
 
 ```json
-{"dal": "2027-02-31"}
+{"dal": "2027-02-31", "al": "2027-03-07"}
 ```
 
 ```json
@@ -264,7 +265,7 @@ Risultato (`structuredContent`):
       "paziente": "Francesca Marino",
       "telefono": "+39 000 4426134",
       "classePriorita": "U",
-      "dataRichiesta": "2026-11-12",
+      "dataRichiesta": "2026-11-13",
       "stessaSede": false
     },
     {
@@ -272,7 +273,7 @@ Risultato (`structuredContent`):
       "paziente": "Giulia Ricci",
       "telefono": "+39 000 2752217",
       "classePriorita": "B",
-      "dataRichiesta": "2026-10-28",
+      "dataRichiesta": "2026-10-29",
       "stessaSede": false
     }
   ]
@@ -337,7 +338,7 @@ Esempio di errore, con i parametri:
 Parametri:
 
 ```json
-{"dal": "2026-11-17", "prestazione": "Visita cardiologica", "classe": "B"}
+{"dal": "2026-11-18", "prestazione": "Visita cardiologica", "classe": "B"}
 ```
 
 Risultato (`structuredContent`):
@@ -471,7 +472,7 @@ Risultato (`structuredContent`):
   "slotId": 812,
   "richiestaId": 262,
   "paziente": "Francesca Marino",
-  "inizio": "2026-11-27 12:30",
+  "inizio": "2026-11-28 12:30",
   "stato": "confermata"
 }
 ```

@@ -114,11 +114,15 @@ Per ogni richiesta l'agente risponde e stampa una riga di servizio con il motivo
 per cui si è fermato, il numero di giri e i token consumati. Prima di eseguire
 un tool che modifica i dati mostra cosa sta per fare e chiede conferma: vale come
 sì solo `s`, `si` o `sì`; qualunque altra risposta annulla l'operazione. Per uscire
-si scrive `esci`.
+si scrive `esci`; per ricominciare la conversazione da capo, `nuova`.
 
-L'agente non ricorda le richieste precedenti: ogni richiesta va scritta completa,
-con i numeri di appuntamento, slot o richiesta. Se Ollama non è acceso, ogni
-richiesta finisce con il motivo `errore`.
+L'agente ricorda gli ultimi 5 scambi della sessione (le richieste e le sue
+risposte finali, senza i dati letti dai tool): si può rispondere a una sua
+domanda o continuare un discorso, per esempio "Riassegna lo slot" e poi "Lo slot
+812, al primo candidato". La memoria resta solo in RAM: si azzera con `nuova`,
+all'uscita e dopo una richiesta interrotta da un errore o dal limite di giri.
+
+Se Ollama non è acceso, ogni richiesta finisce con il motivo `errore`.
 
 Per ogni avvio, nella cartella `logs/` (esclusa da git):
 
@@ -146,7 +150,7 @@ Remove-Item Env:SERVER_MCP
 
 ### Scenari di test
 
-Lo script `src/scenari/esegui.ts` esegue in automatico i 13 scenari di
+Lo script `src/scenari/esegui.ts` esegue in automatico i 14 scenari di
 `docs/scenari-test.md`, con l'agente e il modello veri. Con Docker Desktop e
 Ollama accesi:
 
@@ -154,7 +158,8 @@ Ollama accesi:
 npm run scenari
 ```
 
-Prima di ogni scenario ricrea i dati con `db:reset`. Alle conferme risponde come
+Prima di ogni scenario ricrea i dati con `db:reset` e azzera la memoria
+dell'agente. Alle conferme risponde come
 previsto dallo scenario (no solo nello scenario 5), ferma e riavvia il database
 per lo scenario 8 e usa un percorso del server sbagliato per lo scenario 12.
 Alla fine stampa una tabella con motivo di arresto, giri, token, secondi e

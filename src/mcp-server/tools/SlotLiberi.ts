@@ -3,18 +3,18 @@
 
 import * as z from "zod/v4";
 import { NOMI_PRESTAZIONI, NOMI_SEDI, idPrestazione, idSede } from "../../backend/catalogo.ts";
-import { GIORNI_PREDEFINITI, dataFinale } from "../date.ts";
+import { dataFinale } from "../date.ts";
 import { RecallTool } from "../RecallTool.ts";
 
 // z.iso.date() accetta solo date vere nel formato AAAA-MM-GG: il 31 febbraio
 // viene rifiutato qui, prima di arrivare al database (scenario 9).
 // z.enum(...) accetta solo i nomi presenti nel catalogo.
+// "al" è obbligatoria: nelle prove un modello l'ha omessa per "i prossimi sette
+// giorni", e con il valore predefinito (30 giorni) ha elencato slot fuori
+// dall'intervallo chiesto.
 const schemaInput = z.object({
   dal: z.iso.date().describe("Primo giorno da cercare, formato AAAA-MM-GG"),
-  al: z.iso
-    .date()
-    .optional()
-    .describe(`Ultimo giorno compreso, formato AAAA-MM-GG (se manca: ${GIORNI_PREDEFINITI} giorni dopo "dal")`),
+  al: z.iso.date().describe("Ultimo giorno compreso, formato AAAA-MM-GG"),
   prestazione: z.enum(NOMI_PRESTAZIONI).optional().describe("Solo questa prestazione (se manca: tutte)"),
   sede: z.enum(NOMI_SEDI).optional().describe("Solo questa sede (se manca: tutte)"),
 });
@@ -43,7 +43,7 @@ export class SlotLiberi extends RecallTool<typeof schemaInput, typeof schemaOutp
   readonly soloLettura = true;
 
   async esegui(args: z.infer<typeof schemaInput>): Promise<z.infer<typeof schemaOutput>> {
-    // Se "al" manca vale 30 giorni dopo "dal"; un intervallo al contrario è rifiutato.
+    // Un intervallo al contrario (fine prima dell'inizio) è rifiutato.
     const al = dataFinale(args.dal, args.al);
 
     // Dai nomi agli id, solo se il filtro c'è.

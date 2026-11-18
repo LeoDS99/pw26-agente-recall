@@ -19,7 +19,7 @@ export class Cli implements ConfermaUtente {
   // Il dialogo con l'operatore: va avanti finché non scrive "esci".
   async avvia(agente: Agent): Promise<void> {
     console.log(
-      "Benvenuto nella chat dell'assistente prenotazioni del Gruppo Sanitario Collemare. Scrivi 'esci' per uscire.",
+      "Benvenuto nella chat dell'assistente prenotazioni del Gruppo Sanitario Collemare. Scrivi 'nuova' per ricominciare la conversazione e 'esci' per uscire.",
     );
 
     while (true) {
@@ -32,6 +32,12 @@ export class Cli implements ConfermaUtente {
       }
       if (richiesta === "esci") {
         break;
+      }
+      // "nuova" azzera la memoria: la prossima richiesta parte da zero.
+      if (richiesta === "nuova") {
+        agente.azzeraMemoria();
+        console.log("(conversazione azzerata)");
+        continue;
       }
 
       const esito = await agente.esegui(richiesta);
