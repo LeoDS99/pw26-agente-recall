@@ -42,4 +42,4 @@ Gli attori sono gli utenti dell'agente: l'agente li aiuta, non li sostituisce.
 ## Fuori dal sistema
 - Telefonare o mandare SMS ai pazienti: lo fa l'operatore, il sistema registra solo l'esito.
 - Decisioni o consigli clinici.
-- Scavalcare l'ordine della lista d'attesa, anche su richiesta esplicita.
+- Cambiare l'ordine dei candidati: lo calcola il sistema con regole fisse e il modello non può modificarlo. L'operatore resta libero di scegliere un altro candidato della lista, per esempio se il primo non risponde.
