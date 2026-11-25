@@ -6,7 +6,7 @@
 import type { Messaggio, RispostaModello, SpecTool } from "./tipi.ts";
 
 export interface ModelProvider {
-  // Nome del modello, per esempio "ollama/qwen3:4b-instruct": finisce nel log.
+  // Nome del modello, per esempio "ollama/gemma4:26b": finisce nel log.
   readonly nome: string;
 
   // Manda al modello la conversazione e l'elenco dei tool, e restituisce la sua

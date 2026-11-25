@@ -1,0 +1,23 @@
+@startuml architettura
+left to right direction
+skinparam componentStyle rectangle
+title Architettura del prototipo
+
+actor "Operatore /\nResponsabile" as Utente
+
+rectangle "Computer dell'impresa" {
+  component "Harness\nriga di comando, ciclo agentico,\nconferme, log" as Harness
+  rectangle "Processo del server MCP" {
+    component "Server MCP\n6 tool" as Server
+    component "Back-end\nregole del processo" as Backend
+  }
+  database "PostgreSQL\ndati sintetici" as DB
+  component "Ollama\nmodello linguistico" as Ollama
+}
+
+Utente --> Harness : richieste e conferme
+Harness --> Server : MCP su stdio
+Server --> Backend
+Backend --> DB : SQL
+Harness --> Ollama : HTTP
+@enduml

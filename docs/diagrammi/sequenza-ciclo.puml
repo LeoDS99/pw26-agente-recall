@@ -47,7 +47,7 @@ loop finché c'è una risposta finale o si arriva a maxIterazioni
   end
 end
 
-Cli --> Operatore : "Disdetta registrata: lo slot è libero.\nVuoi cercare un sostituto?"
+Cli --> Operatore : "L'appuntamento 5531 è stato disdetto.\nLo slot 61 è ora libero."
 
 note over Agent
   ogni passo (richiesta al modello, tool, parametri,

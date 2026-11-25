@@ -230,8 +230,10 @@ export class RecallRepository {
     try {
       await c.query("BEGIN");
 
-      // Lo slot, bloccato (FOR UPDATE) fino alla fine: due riassegnazioni
-      // sullo stesso slot non possono passare insieme.
+      // Lo slot, bloccato (FOR UPDATE) fino alla fine della transazione. Se due
+      // riassegnazioni dello stesso slot arrivano insieme, la seconda può non
+      // vedere la prenotazione della prima: la ferma l'indice unico parziale
+      // (errore 23505, gestito nel catch).
       const slot = await c.query<{
         prestazione_id: number;
         prestazione: string;
