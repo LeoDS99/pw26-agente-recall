@@ -1,7 +1,7 @@
 {
   "name": "pw26-agente-recall",
   "version": "1.0.0",
-  "description": "",
+  "description": "Prototipo di Project Work: server MCP e harness agentico per il recupero degli appuntamenti disdetti, con dati sintetici",
   "directories": {
     "doc": "docs"
   },
@@ -22,7 +22,7 @@
     "url": "git+https://github.com/LeoDS99/pw26-agente-recall.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Leonardo Di Salvo",
   "type": "module",
   "bugs": {
     "url": "https://github.com/LeoDS99/pw26-agente-recall/issues"

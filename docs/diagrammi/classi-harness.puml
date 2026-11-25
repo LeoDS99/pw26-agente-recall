@@ -34,6 +34,7 @@ class OllamaProvider {
   - client : Ollama
   - modello : string
   - contesto : number
+  - maxTokenRisposta : number
 }
 
 interface ConfermaUtente {
