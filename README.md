@@ -23,7 +23,7 @@ verifica dei tempi d'attesa.
 
 - Node.js 22 o successivo
 - Docker Desktop (per il database PostgreSQL 18)
-- Ollama 0.40.18 o successivo, con il modello `gemma4:26b` (per l'harness: circa
+- Ollama 0.40.16 o successivo, con il modello `gemma4:26b` (per l'harness: circa
   17 GB da scaricare; provato su un PC con 32 GB di RAM, senza scheda video dedicata)
 - Git
 
