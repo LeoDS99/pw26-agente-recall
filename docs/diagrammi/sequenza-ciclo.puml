@@ -17,7 +17,7 @@ McpToolClient -> Server : tools/list
 Server --> McpToolClient : elenco dei tool
 McpToolClient --> Agent : SpecTool[]
 
-loop finché c'è una risposta finale o si arriva a maxIterazioni
+loop fino alla risposta finale o a maxIterazioni
   Agent -> Modello : chat(messaggi, tools)
   Modello --> Agent : RispostaModello
 

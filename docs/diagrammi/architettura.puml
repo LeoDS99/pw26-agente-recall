@@ -15,7 +15,7 @@ rectangle "Computer dell'impresa" {
   component "Ollama\nmodello linguistico" as Ollama
 }
 
-Utente --> Harness : richieste e conferme
+Utente --> Harness : usa, da riga di comando
 Harness --> Server : MCP su stdio
 Server --> Backend
 Backend --> DB : SQL

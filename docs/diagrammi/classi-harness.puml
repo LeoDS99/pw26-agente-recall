@@ -58,7 +58,7 @@ class JsonlLogger {
   + registra(evento : EventoLog) : void
 }
 
-Cli --> Agent
+Cli ..> Agent
 Cli ..|> ConfermaUtente
 Agent --> ModelProvider
 Agent --> McpToolClient
